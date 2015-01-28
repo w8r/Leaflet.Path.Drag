@@ -174,9 +174,7 @@ L.Path.Drag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     // holes operations
     if (polygon._holes) {
       for (i = 0, len = polygon._holes.length; i < len; i++) {
-        polygon._holes[i] = [];
-
-        for (j = 0, len2 = this._holes[i].length; j < len2; j++) {
+        for (j = 0, len2 = polygon._holes[i].length; j < len2; j++) {
           point = polygon._holePoints[i][j];
           x = point.x;
           y = point.y;
