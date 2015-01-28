@@ -13,7 +13,11 @@ Drag handler for [Leaflet](https://github.com/leaflet/leaflet) vector features.
 <script src="path/to/L.Path.Drag.js"></script>
 ...
 var polygon = new L.Polygon([...], { draggable: true }).addTo(map);
-
+// you can use the drag events just like with markers
+polygon
+    .on('dragstart', onDragStart)
+    .on('drag',      onDrag)
+    .on('dragend',   onDragEnd);
 ```
 
 with browserify
