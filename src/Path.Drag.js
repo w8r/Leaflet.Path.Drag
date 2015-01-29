@@ -10,7 +10,7 @@
  * @class L.Path.Drag
  * @extends {L.Handler}
  */
-L.Path.Drag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
+L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
 
   /**
    * @param  {L.Path} path
@@ -204,7 +204,7 @@ L.Path.Drag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
       if (this.dragging) {
         this.dragging.enable();
       } else {
-        this.dragging = new L.Path.Drag(this);
+        this.dragging = new L.Handler.PathDrag(this);
         this.dragging.enable();
       }
     } else if (this.dragging) {
