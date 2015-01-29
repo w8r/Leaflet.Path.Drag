@@ -157,7 +157,7 @@ L.Path.Drag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
    */
   _onDragStart: function(evt) {
     this._startPoint = L.point(evt.containerPoint);
-    this._dragStartPoint = L.point(evt.containerPoint);
+    this._dragStartPoint = L.point(evt.containerPoint.x, evt.containerPoint.y);
     this._matrix = [1, 0, 0, 1, 0, 0];
 
     this._path._map
