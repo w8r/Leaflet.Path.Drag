@@ -157,18 +157,31 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     var x, y, point;
     var i, j, len, len2;
 
-    // we transformed in pixel space, let's stay there
-    for (i = 0, len = polygon._originalPoints.length; i < len; i++) {
-      point = polygon._originalPoints[i];
+    if (polygon._originalPoints) {
+      // we transformed in pixel space, let's stay there
+      for (i = 0, len = polygon._originalPoints.length; i < len; i++) {
+        point = polygon._originalPoints[i];
+        x = point.x;
+        y = point.y;
+
+        point.x = a * x + b * y + tx;
+        point.y = c * x + d * y + ty;
+
+        // update point
+        polygon._originalPoints[i] = point;
+        polygon._latlngs[i] = this._path._map.layerPointToLatLng(point);
+      }
+    } else {
+      // this is a circle or other shaped composed of a single point
+      point = polygon._point;
       x = point.x;
       y = point.y;
 
       point.x = a * x + b * y + tx;
       point.y = c * x + d * y + ty;
 
-      // update point
-      polygon._originalPoints[i] = point;
-      polygon._latlngs[i] = this._path._map.layerPointToLatLng(point);
+      polygon._point = point;
+      polygon._latlng = this._path._map.layerPointToLatLng(point);
     }
 
     // holes operations
