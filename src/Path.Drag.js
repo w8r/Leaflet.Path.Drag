@@ -152,42 +152,49 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     var ty = matrix[5];
 
     var polygon = this._path;
+    var map = this._path._map;
     var latlngs = [];
 
-    var x, y, point;
     var i, j, len, len2;
 
-    // we transformed in pixel space, let's stay there
-    for (i = 0, len = polygon._originalPoints.length; i < len; i++) {
-      point = polygon._originalPoints[i];
-      x = point.x;
-      y = point.y;
+    // I tried to pre-compile that - no difference
+    // Expanding code without inline function is
+    // somehow even slower
+    function transform(point) {
+      var x = point.x;
+      var y = point.y;
 
       point.x = a * x + b * y + tx;
       point.y = c * x + d * y + ty;
 
-      // update point
-      polygon._originalPoints[i] = point;
-      polygon._latlngs[i] = this._path._map.layerPointToLatLng(point);
+      return point;
+    }
+
+    // console.time('transform');
+
+    // we transformed in pixel space, let's stay there
+    if (polygon._originalPoints) {
+      for (i = 0, len = polygon._originalPoints.length; i < len; i++) {
+        polygon._latlngs[i] = map.layerPointToLatLng(
+          transform(polygon._originalPoints[i])
+        );
+      }
+    } else if (polygon._point) {
+      polygon._latlng = map.layerPointToLatLng(transform(polygon._point));
     }
 
     // holes operations
     if (polygon._holes) {
       for (i = 0, len = polygon._holes.length; i < len; i++) {
         for (j = 0, len2 = polygon._holes[i].length; j < len2; j++) {
-          point = polygon._holePoints[i][j];
-          x = point.x;
-          y = point.y;
-
-          point.x = a * x + b * y + tx;
-          point.y = c * x + d * y + ty;
-
-          // update hole point
-          polygon._holePoints[i][j] = point;
-          polygon._holes[i][j] = this._path._map.layerPointToLatLng(point);
+          polygon._holes[i][j] = map.layerPointToLatLng(
+            transform(polygon._holePoints[i][j])
+          );
         }
       }
     }
+
+    // console.timeEnd('transform');
 
     polygon._updatePath();
   }

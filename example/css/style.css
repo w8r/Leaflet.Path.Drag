@@ -26,6 +26,11 @@ h2, h3 {
   border-radius: 4px;
 }
 
+#controls p em {
+  color: #888888;
+  font-size: 0.9em;
+}
+
 #controls .wrapper {
   padding: 30px;
 }
