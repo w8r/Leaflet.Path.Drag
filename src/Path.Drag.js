@@ -142,7 +142,7 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
    * @param  {Array.<Number>} matrix
    * @return {L.Point}
    */
-  _transformPoints: function(matrix) {
+  _transformPoints: function() {
     var matrix = this._matrix;
     var a = matrix[0];
     var c = matrix[1];
@@ -153,7 +153,6 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
 
     var polygon = this._path;
     var map = this._path._map;
-    var latlngs = [];
 
     var i, j, len, len2;
 
