@@ -172,14 +172,14 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     // console.time('transform');
 
     // we transformed in pixel space, let's stay there
-    if (polygon._originalPoints) {
+    if (polygon._point) {
+      polygon._latlng = map.layerPointToLatLng(transform(polygon._point));
+    } else if (polygon._originalPoints) {
       for (i = 0, len = polygon._originalPoints.length; i < len; i++) {
         polygon._latlngs[i] = map.layerPointToLatLng(
           transform(polygon._originalPoints[i])
         );
       }
-    } else if (polygon._point) {
-      polygon._latlng = map.layerPointToLatLng(transform(polygon._point));
     }
 
     // holes operations
