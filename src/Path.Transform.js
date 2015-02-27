@@ -86,3 +86,22 @@ if (L.Browser.svg) { // SVG transformation
 
   });
 }
+
+// Renderer-independent
+L.Path.include({
+
+  /**
+   * Check if the feature was dragged, that'll supress the click event
+   * on mouseup. That fixes popups for example
+   *
+   * @param  {MouseEvent} e
+   */
+  _onMouseClick: function(e) {
+    if ((this.dragging && this.dragging.moved()) ||
+      (this._map.dragging && this._map.dragging.moved())) {
+      return;
+    }
+
+    this._fireMouseEvent(e);
+  }
+});

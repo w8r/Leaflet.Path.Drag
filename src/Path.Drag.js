@@ -68,8 +68,8 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
    * @param  {L.MouseEvent} evt
    */
   _onDragStart: function(evt) {
-    this._startPoint = L.point(evt.containerPoint);
-    this._dragStartPoint = L.point(evt.containerPoint.x, evt.containerPoint.y);
+    this._startPoint = evt.containerPoint.clone();
+    this._dragStartPoint = evt.containerPoint.clone();
     this._matrix = [1, 0, 0, 1, 0, 0];
 
     this._path._map
@@ -110,6 +110,7 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
    * @param  {L.MouseEvent} evt
    */
   _onDragEnd: function(evt) {
+    L.DomEvent.stop(evt);
     // undo container transform
     this._path._resetTransform();
     // apply matrix
@@ -137,10 +138,6 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
    *
    * [ x ]   [ a  b  tx ] [ x ]   [ a * x + b * y + tx ]
    * [ y ] = [ c  d  ty ] [ y ] = [ c * x + d * y + ty ]
-   *
-   * @param  {L.Point}        pt
-   * @param  {Array.<Number>} matrix
-   * @return {L.Point}
    */
   _transformPoints: function() {
     var matrix = this._matrix;
@@ -151,7 +148,7 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     var tx = matrix[4];
     var ty = matrix[5];
 
-    var polygon = this._path;
+    var path = this._path;
     var map = this._path._map;
 
     var i, j, len, len2;
@@ -172,22 +169,22 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     // console.time('transform');
 
     // we transformed in pixel space, let's stay there
-    if (polygon._point) {
-      polygon._latlng = map.layerPointToLatLng(transform(polygon._point));
-    } else if (polygon._originalPoints) {
-      for (i = 0, len = polygon._originalPoints.length; i < len; i++) {
-        polygon._latlngs[i] = map.layerPointToLatLng(
-          transform(polygon._originalPoints[i])
+    if (path._point) { // L.Circle
+      path._latlng = map.layerPointToLatLng(transform(path._point));
+    } else if (path._originalPoints) { // everything else
+      for (i = 0, len = path._originalPoints.length; i < len; i++) {
+        path._latlngs[i] = map.layerPointToLatLng(
+          transform(path._originalPoints[i])
         );
       }
     }
 
     // holes operations
-    if (polygon._holes) {
-      for (i = 0, len = polygon._holes.length; i < len; i++) {
-        for (j = 0, len2 = polygon._holes[i].length; j < len2; j++) {
-          polygon._holes[i][j] = map.layerPointToLatLng(
-            transform(polygon._holePoints[i][j])
+    if (path._holes) {
+      for (i = 0, len = path._holes.length; i < len; i++) {
+        for (j = 0, len2 = path._holes[i].length; j < len2; j++) {
+          path._holes[i][j] = map.layerPointToLatLng(
+            transform(path._holePoints[i][j])
           );
         }
       }
@@ -195,7 +192,7 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
 
     // console.timeEnd('transform');
 
-    polygon._updatePath();
+    path._updatePath();
   }
 
 });
