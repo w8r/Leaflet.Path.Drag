@@ -118,7 +118,7 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     // undo container transform
     this._path._resetTransform();
     // apply matrix
-    this._transformPoints();
+    this._transformPoints(this._matrix);
 
     this._path._map
       .off('mousemove', this._onDrag, this)
@@ -142,12 +142,14 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
    *
    * [ x ]   [ a  b  tx ] [ x ]   [ a * x + b * y + tx ]
    * [ y ] = [ c  d  ty ] [ y ] = [ c * x + d * y + ty ]
+   *
+   * @param {Array.<Number>} matrix
    */
-  _transformPoints: function() {
+  _transformPoints: function(matrix) {
     var path = this._path;
     var i, len, latlng;
 
-    var px = L.point(this._matrix[4], this._matrix[5]);
+    var px = L.point(matrix[4], matrix[5]);
 
     var crs = path._map.options.crs;
     var transformation = crs.transformation;
@@ -192,22 +194,18 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
 
 });
 
-(function() {
-  var initEvents = L.Path.prototype._initEvents;
+L.Path.prototype.__initEvents = L.Path.prototype._initEvents;
+L.Path.prototype._initEvents = function() {
+  this.__initEvents();
 
-  L.Path.prototype._initEvents = function() {
-    initEvents.call(this);
-
-    if (this.options.draggable) {
-      if (this.dragging) {
-        this.dragging.enable();
-      } else {
-        this.dragging = new L.Handler.PathDrag(this);
-        this.dragging.enable();
-      }
-    } else if (this.dragging) {
-      this.dragging.disable();
+  if (this.options.draggable) {
+    if (this.dragging) {
+      this.dragging.enable();
+    } else {
+      this.dragging = new L.Handler.PathDrag(this);
+      this.dragging.enable();
     }
-  };
-
-})();
+  } else if (this.dragging) {
+    this.dragging.disable();
+  }
+};
