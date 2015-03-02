@@ -112,6 +112,10 @@ L.Path.include({
 
 "use strict";
 
+L.Point.prototype.toString = function() {
+  return this.x + ',' + this.y;
+};
+
 /**
  * Drag handler
  * @class L.Path.Drag
@@ -247,52 +251,43 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
    * [ y ] = [ c  d  ty ] [ y ] = [ c * x + d * y + ty ]
    */
   _transformPoints: function() {
-    var matrix = this._matrix;
-    var a = matrix[0];
-    var c = matrix[1];
-    var b = matrix[2];
-    var d = matrix[3];
-    var tx = matrix[4];
-    var ty = matrix[5];
-
     var path = this._path;
-    var map = this._path._map;
+    var i, len, latlng;
 
-    var i, j, len, len2;
+    var px = L.point(this._matrix[4], this._matrix[5]);
 
-    // I tried to pre-compile that - no difference
-    // Expanding code without inline function is
-    // somehow even slower
-    function transform(point) {
-      var x = point.x;
-      var y = point.y;
+    var crs = path._map.options.crs;
+    var transformation = crs.transformation;
+    var scale = crs.scale(path._map.getZoom());
+    var projection = crs.projection;
 
-      point.x = a * x + b * y + tx;
-      point.y = c * x + d * y + ty;
-
-      return point;
-    }
+    var diff = transformation.untransform(px, scale)
+      .subtract(transformation.untransform(L.point(0, 0), scale));
 
     // console.time('transform');
 
-    // we transformed in pixel space, let's stay there
+    // all shifts are in-place
     if (path._point) { // L.Circle
-      path._latlng = map.layerPointToLatLng(transform(path._point));
+      path._latlng = projection.unproject(
+        projection.project(path._latlng)._add(diff));
+      path._point._add(px);
     } else if (path._originalPoints) { // everything else
       for (i = 0, len = path._originalPoints.length; i < len; i++) {
-        path._latlngs[i] = map.layerPointToLatLng(
-          transform(path._originalPoints[i])
-        );
+        latlng = path._latlngs[i];
+        path._latlngs[i] = projection
+          .unproject(projection.project(latlng)._add(diff));
+        path._originalPoints[i]._add(px);
       }
     }
 
     // holes operations
     if (path._holes) {
       for (i = 0, len = path._holes.length; i < len; i++) {
-        for (j = 0, len2 = path._holes[i].length; j < len2; j++) {
-          path._holes[i][j] = map.layerPointToLatLng(
-            transform(path._holePoints[i][j])
-          );
+        for (var j = 0, len2 = path._holes[i].length; j < len2; j++) {
+          latlng = path._holes[i][j];
+          path._holes[i][j] = projection
+            .unproject(projection.project(latlng)._add(diff));
+          path._holePoints[i][j]._add(px);
         }
       }
     }

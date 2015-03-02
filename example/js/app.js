@@ -4,7 +4,9 @@ var DragHandler = require('../../index');
 L.Icon.Default.imagePath = "http://cdn.leafletjs.com/leaflet-0.7/images";
 
 ////////////////////////////////////////////////////////////////////////////////
-var map = global.map = new L.Map('map', {}).setView([22.42658, 114.1452], 11);
+var map = global.map = new L.Map('map', {
+  // crs: L.CRS.EPSG4326 // that was tested as well
+}).setView([22.42658, 114.1452], 11);
 
 L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
   attribution: '&copy; ' +
