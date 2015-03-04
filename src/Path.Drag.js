@@ -5,10 +5,6 @@
 
 "use strict";
 
-L.Point.prototype.toString = function() {
-  return this.x + ',' + this.y;
-};
-
 /**
  * Drag handler
  * @class L.Path.Drag
