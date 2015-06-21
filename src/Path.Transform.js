@@ -13,7 +13,7 @@ if (L.Browser.svg) { // SVG transformation
      * Reset transform matrix
      */
     _resetTransform: function() {
-      this._container.setAttributeNS(null, 'transform', '');
+      this._path.setAttributeNS(null, 'transform', '');
     },
 
     /**
@@ -21,7 +21,7 @@ if (L.Browser.svg) { // SVG transformation
      * @param {Array.<Number>} matrix
      */
     _applyTransform: function(matrix) {
-      this._container.setAttributeNS(null, "transform",
+      this._path.setAttributeNS(null, "transform",
         'matrix(' + matrix.join(' ') + ')');
     }
 
@@ -39,7 +39,7 @@ if (L.Browser.svg) { // SVG transformation
         // super important! workaround for a 'jumping' glitch:
         // disable transform before removing it
         this._skew.on = false;
-        this._container.removeChild(this._skew);
+        this._path.removeChild(this._skew);
         this._skew = null;
       }
     },
@@ -53,7 +53,7 @@ if (L.Browser.svg) { // SVG transformation
 
       if (!skew) {
         skew = this._createElement('skew');
-        this._container.appendChild(skew);
+        this._path.appendChild(skew);
         skew.style.behavior = 'url(#default#VML)';
         this._skew = skew;
       }
@@ -64,7 +64,7 @@ if (L.Browser.svg) { // SVG transformation
       var offset = Math.floor(matrix[4]).toFixed() + ", " +
         Math.floor(matrix[5]).toFixed() + "";
 
-      var s = this._container.style;
+      var s = this._path.style;
       var l = parseFloat(s.left);
       var t = parseFloat(s.top);
       var w = parseFloat(s.width);

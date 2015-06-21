@@ -1,7 +1,7 @@
-var L = global.L || require('leaflet');
+var L = global.L;
 var DragHandler = require('../../index');
 
-L.Icon.Default.imagePath = "http://cdn.leafletjs.com/leaflet-0.7/images";
+L.Icon.Default.imagePath = "leaflet-master/images";
 
 ////////////////////////////////////////////////////////////////////////////////
 var map = global.map = new L.Map('map', {
@@ -136,7 +136,7 @@ var circleMarker = new L.CircleMarker(map.getCenter(), {
   .bindPopup("L.CircleMarker")
   .addTo(map);
 
-var multiPolygon = global.multiPolygon = new L.MultiPolygon([
+var multiPolygon = global.multiPolygon = new L.Polygon([
   L.GeoJSON.coordsToLatLngs([
     [114.20562744140625, 22.32085984100593],
     [114.21592712402344, 22.35261603551215],
@@ -181,7 +181,7 @@ var multiPolygon = global.multiPolygon = new L.MultiPolygon([
   color: '#092'
 }).bindPopup('MultiPolygon').addTo(map);
 
-var multiPolyline = global.multiPolyline = new L.MultiPolyline([
+var multiPolyline = global.multiPolyline = new L.Polyline([
   L.GeoJSON.coordsToLatLngs([
     [113.89869689941406, 22.399601921706953],
     [113.89801025390625, 22.422454181709707],

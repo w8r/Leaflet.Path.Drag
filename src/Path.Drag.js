@@ -45,7 +45,7 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
    */
   addHooks: function() {
     this._path.on('mousedown', this._onDragStart, this);
-    L.DomUtil.addClass(this._path._container, 'leaflet-path-draggable');
+    L.DomUtil.addClass(this._path._path, 'leaflet-path-draggable');
   },
 
   /**
@@ -53,7 +53,7 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
    */
   removeHooks: function() {
     this._path.off('mousedown', this._onDragStart, this);
-    L.DomUtil.removeClass(this._path._container, 'leaflet-path-draggable');
+    L.DomUtil.removeClass(this._path._path, 'leaflet-path-draggable');
   },
 
   /**
@@ -68,13 +68,20 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
    * @param  {L.MouseEvent} evt
    */
   _onDragStart: function(evt) {
+    console.log('md', evt);
     this._startPoint = evt.containerPoint.clone();
     this._dragStartPoint = evt.containerPoint.clone();
     this._matrix = [1, 0, 0, 1, 0, 0];
+    console.log(evt)
+    L.DomEvent.stop(evt.originalEvent);
+
 
     this._path._map
+      .on('mousemove', this._onDrag, this);
+    this._path
       .on('mousemove', this._onDrag, this)
       .on('mouseup', this._onDragEnd, this)
+    this._path._map.dragging.disable();
     this._path._dragMoved = false;
   },
 
@@ -83,6 +90,7 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
    * @param  {L.MouseEvent} evt
    */
   _onDrag: function(evt) {
+    //console.log('mm', evt);
     var x = evt.containerPoint.x;
     var y = evt.containerPoint.y;
 
@@ -110,13 +118,16 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
    * @param  {L.MouseEvent} evt
    */
   _onDragEnd: function(evt) {
-    L.DomEvent.stop(evt);
-    // undo container transform
+    console.log('de', evt)
+      //L.DomEvent.stop(evt.originalEvent);
+      // undo container transform
     this._path._resetTransform();
     // apply matrix
     this._transformPoints(this._matrix);
 
     this._path._map
+      .off('mousemove', this._onDrag, this);
+    this._path
       .off('mousemove', this._onDrag, this)
       .off('mouseup', this._onDragEnd, this);
 
@@ -130,6 +141,7 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     this._matrix = null;
     this._startPoint = null;
     this._dragStartPoint = null;
+    //this._path._map.dragging.enable();
   },
 
   /**
@@ -154,6 +166,8 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
 
     var diff = transformation.untransform(px, scale)
       .subtract(transformation.untransform(L.point(0, 0), scale));
+
+    console.log(path)
 
     // console.time('transform');
 
@@ -190,10 +204,9 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
 
 });
 
-L.Path.prototype.__initEvents = L.Path.prototype._initEvents;
-L.Path.prototype._initEvents = function() {
-  this.__initEvents();
-
+L.Path.prototype.__onAdd = L.Path.prototype.onAdd;
+L.Path.prototype.onAdd = function(map) {
+  this.__onAdd.call(this, map);
   if (this.options.draggable) {
     if (this.dragging) {
       this.dragging.enable();
@@ -205,3 +218,19 @@ L.Path.prototype._initEvents = function() {
     this.dragging.disable();
   }
 };
+
+// L.Path.prototype.__initEvents = L.Path.prototype._initEvents;
+// L.Path.prototype._initEvents = function() {
+//   this.__initEvents();
+
+//   if (this.options.draggable) {
+//     if (this.dragging) {
+//       this.dragging.enable();
+//     } else {
+//       this.dragging = new L.Handler.PathDrag(this);
+//       this.dragging.enable();
+//     }
+//   } else if (this.dragging) {
+//     this.dragging.disable();
+//   }
+// };
