@@ -68,11 +68,9 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
    * @param  {L.MouseEvent} evt
    */
   _onDragStart: function(evt) {
-    console.log('md', evt);
     this._startPoint = evt.containerPoint.clone();
     this._dragStartPoint = evt.containerPoint.clone();
     this._matrix = [1, 0, 0, 1, 0, 0];
-    console.log(evt)
     L.DomEvent.stop(evt.originalEvent);
 
 
@@ -90,7 +88,6 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
    * @param  {L.MouseEvent} evt
    */
   _onDrag: function(evt) {
-    //console.log('mm', evt);
     var x = evt.containerPoint.x;
     var y = evt.containerPoint.y;
 
@@ -118,9 +115,6 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
    * @param  {L.MouseEvent} evt
    */
   _onDragEnd: function(evt) {
-    console.log('de', evt)
-      //L.DomEvent.stop(evt.originalEvent);
-      // undo container transform
     this._path._resetTransform();
     // apply matrix
     this._transformPoints(this._matrix);
@@ -141,7 +135,7 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     this._matrix = null;
     this._startPoint = null;
     this._dragStartPoint = null;
-    //this._path._map.dragging.enable();
+    this._path._map.dragging.enable();
   },
 
   /**
@@ -167,7 +161,7 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     var diff = transformation.untransform(px, scale)
       .subtract(transformation.untransform(L.point(0, 0), scale));
 
-    console.log(path)
+    console.log(path);
 
     // console.time('transform');
 
@@ -176,12 +170,14 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
       path._latlng = projection.unproject(
         projection.project(path._latlng)._add(diff));
       path._point._add(px);
-    } else if (path._originalPoints) { // everything else
-      for (i = 0, len = path._originalPoints.length; i < len; i++) {
-        latlng = path._latlngs[i];
-        path._latlngs[i] = projection
-          .unproject(projection.project(latlng)._add(diff));
-        path._originalPoints[i]._add(px);
+    } else if (path._rings) { // everything else
+      for (i = 0, len = path._rings.length; i < len; i++) {
+        for (var j = 0, jj = path._rings[i].length; j < jj; j++) {
+          latlng = path._latlngs[i][j];
+          path._latlngs[i][j] = projection
+            .unproject(projection.project(latlng)._add(diff));
+          path._rings[i][j]._add(px);
+        }
       }
     }
 
