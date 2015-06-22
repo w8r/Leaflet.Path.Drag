@@ -38,6 +38,11 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
      */
     this._dragStartPoint = null;
 
+    /**
+     * @type {Boolean}
+     */
+    this._mapDraggingWasEnabled = false;
+
   },
 
   /**
@@ -68,18 +73,21 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
    * @param  {L.MouseEvent} evt
    */
   _onDragStart: function(evt) {
+    this._mapDraggingWasEnabled = false;
     this._startPoint = evt.containerPoint.clone();
     this._dragStartPoint = evt.containerPoint.clone();
     this._matrix = [1, 0, 0, 1, 0, 0];
     L.DomEvent.stop(evt.originalEvent);
 
-
-    this._path._map
-      .on('mousemove', this._onDrag, this);
+    this._path._map.on('mousemove', this._onDrag, this);
     this._path
       .on('mousemove', this._onDrag, this)
-      .on('mouseup', this._onDragEnd, this)
-    this._path._map.dragging.disable();
+      .on('mouseup', this._onDragEnd, this);
+
+    if (this._path._map.dragging.enabled()) {
+      this._mapDraggingWasEnabled = true;
+      this._path._map.dragging.disable();
+    }
     this._path._dragMoved = false;
   },
 
@@ -97,6 +105,8 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     if (!this._path._dragMoved && (dx || dy)) {
       this._path._dragMoved = true;
       this._path.fire('dragstart');
+      // we don't want that to happen on click
+      this._path.bringToFront();
     }
 
     this._matrix[4] += dx;
@@ -119,8 +129,7 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     // apply matrix
     this._transformPoints(this._matrix);
 
-    this._path._map
-      .off('mousemove', this._onDrag, this);
+    this._path._map.off('mousemove', this._onDrag, this);
     this._path
       .off('mousemove', this._onDrag, this)
       .off('mouseup', this._onDragEnd, this);
@@ -135,7 +144,10 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     this._matrix = null;
     this._startPoint = null;
     this._dragStartPoint = null;
-    this._path._map.dragging.enable();
+
+    if (this._mapDraggingWasEnabled) {
+      this._path._map.dragging.enable();
+    }
   },
 
   /**
@@ -161,38 +173,27 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     var diff = transformation.untransform(px, scale)
       .subtract(transformation.untransform(L.point(0, 0), scale));
 
-    console.log(path);
-
     // console.time('transform');
-
     // all shifts are in-place
     if (path._point) { // L.Circle
       path._latlng = projection.unproject(
         projection.project(path._latlng)._add(diff));
       path._point._add(px);
-    } else if (path._rings) { // everything else
-      for (i = 0, len = path._rings.length; i < len; i++) {
-        for (var j = 0, jj = path._rings[i].length; j < jj; j++) {
-          latlng = path._latlngs[i][j];
-          path._latlngs[i][j] = projection
+    } else if (path._rings || path._parts) { // everything else
+      var rings = path._rings || path._parts;
+      var latlngs = path._latlngs;
+      if (!L.Util.isArray(latlngs[0])) { // polyline
+        latlngs = [latlngs];
+      }
+      for (i = 0, len = rings.length; i < len; i++) {
+        for (var j = 0, jj = rings[i].length; j < jj; j++) {
+          latlng = latlngs[i][j];
+          latlngs[i][j] = projection
             .unproject(projection.project(latlng)._add(diff));
-          path._rings[i][j]._add(px);
+          rings[i][j]._add(px);
         }
       }
     }
-
-    // holes operations
-    if (path._holes) {
-      for (i = 0, len = path._holes.length; i < len; i++) {
-        for (var j = 0, len2 = path._holes[i].length; j < len2; j++) {
-          latlng = path._holes[i][j];
-          path._holes[i][j] = projection
-            .unproject(projection.project(latlng)._add(diff));
-          path._holePoints[i][j]._add(px);
-        }
-      }
-    }
-
     // console.timeEnd('transform');
 
     path._updatePath();
@@ -214,19 +215,3 @@ L.Path.prototype.onAdd = function(map) {
     this.dragging.disable();
   }
 };
-
-// L.Path.prototype.__initEvents = L.Path.prototype._initEvents;
-// L.Path.prototype._initEvents = function() {
-//   this.__initEvents();
-
-//   if (this.options.draggable) {
-//     if (this.dragging) {
-//       this.dragging.enable();
-//     } else {
-//       this.dragging = new L.Handler.PathDrag(this);
-//       this.dragging.enable();
-//     }
-//   } else if (this.dragging) {
-//     this.dragging.disable();
-//   }
-// };
