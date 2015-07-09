@@ -237,6 +237,7 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     this._matrix = null;
     this._startPoint = null;
     this._dragStartPoint = null;
+    this._path._dragMoved = false;
   },
 
   /**
