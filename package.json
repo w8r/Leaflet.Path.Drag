@@ -10,7 +10,7 @@
     "build-js": "cat ./src/Path.Transform.js ./src/Path.Drag.js > ./dist/L.Path.Drag-src.js",
     "compress": "uglifyjs ./dist/L.Path.Drag-src.js -o ./dist/L.Path.Drag.js -m",
     "build": "npm run build-js && npm run compress",
-    "release": "git push origin master && git checkout gh-pages && git merge master && git push origin gh-pages && npm publish"
+    "release": "git push origin master && git checkout gh-pages && git merge master && git push origin gh-pages && git checkout master && npm publish"
   },
   "keywords": [
     "leaflet",
@@ -31,7 +31,7 @@
   "dependencies": {},
   "devDependencies": {
     "browserify": "^8.1.1",
-    "leaflet": "git://github.com/leaflet/leaflet",
+    "leaflet": "git+https://github.com/leaflet/leaflet",
     "serve": "^1.4.0",
     "uglifyjs": "^2.3.6",
     "watchify": "^2.2.1"
