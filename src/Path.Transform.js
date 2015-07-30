@@ -19,6 +19,7 @@ L.Path.include({
 			} else {
 				// reset transform matrix
 				this._renderer._resetTransformPath(this);
+				this._update();
 			}
 		}
 		return this;

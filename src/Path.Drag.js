@@ -83,6 +83,8 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
 		this._matrix = [1, 0, 0, 1, 0, 0];
 		L.DomEvent.stop(evt.originalEvent);
 
+		L.DomUtil.addClass(this._path._renderer._container, 'leaflet-interactive');
+
 		this._path._map.on('mousemove', this._onDrag, this);
 		this._path
 			.on('mousemove', this._onDrag, this)
@@ -129,9 +131,12 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
 	 * @param  {L.MouseEvent} evt
 	 */
 	_onDragEnd: function(evt) {
-		this._path.transform(null);
 		// apply matrix
-		this._transformPoints(this._matrix);
+		if (this.moved()) {
+			this._transformPoints(this._matrix);
+			this._path._project();
+			this._path.transform(null);
+		}
 
 		this._path._map.off('mousemove', this._onDrag, this);
 		this._path
@@ -177,6 +182,8 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
 		var diff = transformation.untransform(px, scale)
 			.subtract(transformation.untransform(L.point(0, 0), scale));
 
+		path._bounds = new L.LatLngBounds();
+
 		// console.time('transform');
 		// all shifts are in-place
 		if (path._point) { // L.Circle
@@ -194,6 +201,7 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
 					latlng = latlngs[i][j];
 					latlngs[i][j] = projection
 						.unproject(projection.project(latlng)._add(diff));
+					path._bounds.extend(latlngs[i][j]);
 					rings[i][j]._add(px);
 				}
 			}
@@ -205,9 +213,7 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
 
 });
 
-L.Path.prototype.__onAdd = L.Path.prototype.onAdd;
-L.Path.prototype.onAdd = function(map) {
-	this.__onAdd.call(this, map);
+L.Path.addInitHook(function() {
 	if (this.options.draggable) {
 		if (this.dragging) {
 			this.dragging.enable();
@@ -218,4 +224,4 @@ L.Path.prototype.onAdd = function(map) {
 	} else if (this.dragging) {
 		this.dragging.disable();
 	}
-};
+});

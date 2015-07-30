@@ -1,3 +1,7 @@
+L.Util.trueFn = function() {
+	return true;
+};
+
 L.Canvas.include({
 
 	/**
@@ -5,8 +9,18 @@ L.Canvas.include({
 	 * @param  {L.Path} layer
 	 */
 	_resetTransformPath: function(layer) {
-		delete this._copy;
-		delete this._copyCtx;
+		if (!this._containerCopy) {
+			return;
+		}
+		delete this._containerCopy;
+
+		if (layer._containsPoint_) {
+			layer._containsPoint = layer._containsPoint_;
+			delete layer._containsPoint_;
+
+			this._requestRedraw(layer);
+			this._draw(true);
+		}
 	},
 
 	/**
@@ -24,45 +38,37 @@ L.Canvas.include({
 	 * @param  {Array.<Number>} matrix
 	 */
 	transformPath: function(layer, matrix) {
-		if (!this._copy) {
-			this._copy = document.createElement('canvas');
-			this._copyCtx = this._copy.getContext('2d');
-			this._copy.width = this._container.width;
-			this._copy.height = this._container.height;
+		var copy = this._containerCopy;
+		var ctx = this._ctx;
 
-			document.body.appendChild(this._copy);
-			this._copy.style.width = this._container.width / 5 + 'px';
-			this._copy.style.height = this._container.height / 5 + 'px';
-			this._copy.style.position = 'absolute';
-			this._copy.style.top = 0;
-			this._copy.style.left = 0;
-			this._copy.style.zIndex = 9999;
-			this._copy.style.border = '1px solid #444';
-			console.log(this._copy);
+		if (!copy) {
+			copy = this._containerCopy = document.createElement('canvas');
+			copy.width = this._container.width;
+			copy.height = this._container.height;
 
 			layer._removed = true;
-			this._redrawBounds = this._redrawBounds || new L.Bounds();
-			this._redrawBounds.extend(layer._pxBounds.min).extend(layer._pxBounds.max);
 			this._redraw();
-			this._copyCtx.drawImage(this._container, 0, 0)
 
+			copy.getContext('2d').translate(this._bounds.min.x, this._bounds.min.y);
+			copy.getContext('2d').drawImage(this._container, 0, 0);
 			this._initPath(layer);
+			layer._containsPoint_ = layer._containsPoint;
+			layer._containsPoint = L.Util.trueFn;
 		}
 
-		this._ctx.save();
-		//this._ctx.clearRect(0, 0, this._copy.width, this._copy.height);
-		this._ctx.drawImage(this._copy, 0, 0, this._copy.width, this._copy.height);
-		this._ctx.transform.apply(this._ctx, matrix);
+		ctx.save();
+		ctx.clearRect(0, 0, copy.width, copy.height);
+		ctx.drawImage(this._containerCopy, 0, 0);
+		ctx.transform.apply(this._ctx, matrix);
 
-		var lrs = this._layers;
-		this._layers = {}
+		var layers = this._layers;
+		this._layers = {};
+
 		this._initPath(layer);
-		//this._updatePoly(layer, true);
-		this._layers = lrs;
+		layer._updatePath();
 
-		//this._layers
-		//layer._removed = true;
-		this._ctx.restore();
+		this._layers = layers;
+		ctx.restore();
 	}
 
 });
