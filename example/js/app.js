@@ -1,4 +1,5 @@
 var L = global.L;
+// L.Browser.retina = true;
 var DragHandler = require('../../index');
 
 L.Icon.Default.imagePath = "leaflet-master/images";

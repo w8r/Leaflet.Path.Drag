@@ -12,9 +12,7 @@ L.Canvas.include({
     if (!this._containerCopy) {
       return;
     }
-    document.body.removeChild(this._containerCopy);
     delete this._containerCopy;
-
 
     if (layer._containsPoint_) {
       layer._containsPoint = layer._containsPoint_;
@@ -42,37 +40,33 @@ L.Canvas.include({
   transformPath: function(layer, matrix) {
     var copy = this._containerCopy;
     var ctx = this._ctx;
+    var m = L.Browser.retina ? 2 : 1;
+    var bounds = this._bounds;
+    var size = bounds.getSize();
+    var pos = L.DomUtil.getPosition(this._container);
 
     if (!copy) {
       copy = this._containerCopy = document.createElement('canvas');
-      copy.width = this._container.width;
-      copy.height = this._container.height;
 
-      document.body.appendChild(copy);
-      copy.style.position = 'absolute';
-      copy.style.top = copy.style.left = 0;
-      copy.style.zIndex = 9999;
-      copy.style.width = this._container.width / 5 + 'px';
-      copy.style.height = this._container.height / 5 + 'px';
+      copy.width = m * size.x;
+      copy.height = m * size.y;
 
       layer._removed = true;
       this._redraw();
 
-      copy.getContext('2d').translate(this._bounds.min.x, this._bounds.min.y);
+      copy.getContext('2d').translate(m * bounds.min.x, m * bounds.min.y);
       copy.getContext('2d').drawImage(this._container, 0, 0);
       this._initPath(layer);
       layer._containsPoint_ = layer._containsPoint;
       layer._containsPoint = L.Util.trueFn;
     }
 
-    ctx.clearRect(
-      this._bounds.min.x, this._bounds.min.y,
-      this._container.width, this._container.height);
-
+    ctx.clearRect(pos.x * m, pos.y * m, size.x * m, size.y * m);
+    console.log(pos.x * m, pos.y * m, size.x * m, size.y * m);
     ctx.save();
 
-    ctx.drawImage(this._containerCopy, 0, 0);
-    ctx.transform.apply(this._ctx, matrix);
+    ctx.drawImage(this._containerCopy, 0, 0, size.x, size.y);
+    ctx.transform.apply(ctx, matrix);
 
     var layers = this._layers;
     this._layers = {};

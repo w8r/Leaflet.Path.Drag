@@ -49,7 +49,7 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
    * Enable dragging
    */
   addHooks: function() {
-    this._path.on(L.Draggable.START.join(' '), this._onDragStart, this);
+    this._path.on('mousedown', this._onDragStart, this);
     if (this._path._path) {
       L.DomUtil.addClass(this._path._path, 'leaflet-path-draggable');
     }
@@ -59,7 +59,7 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
    * Disable dragging
    */
   removeHooks: function() {
-    this._path.off(L.Draggable.START.join(' '), this._onDragStart, this);
+    this._path.off('mousedown', this._onDragStart, this);
     if (this._path._path) {
       L.DomUtil.removeClass(this._path._path, 'leaflet-path-draggable');
     }
@@ -77,26 +77,18 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
    * @param  {L.MouseEvent} evt
    */
   _onDragStart: function(evt) {
-    var eventType = evt.originalEvent.type;
+    var eventType = evt.originalEvent._simulated ? 'touchstart' : evt.originalEvent.type;
+
     this._mapDraggingWasEnabled = false;
     this._startPoint = evt.containerPoint.clone();
     this._dragStartPoint = evt.containerPoint.clone();
     this._matrix = [1, 0, 0, 1, 0, 0];
     L.DomEvent.stop(evt.originalEvent);
 
-    console.log(eventType, L.Draggable.END[eventType], L.Draggable.MOVE[eventType]);
-
     L.DomUtil.addClass(this._path._renderer._container, 'leaflet-interactive');
-
-    // this._path._map.on('mousemove', this._onDrag, this);
-    // this._path
-    //   .on('mousemove', this._onDrag, this)
-    //   .on('mouseup', this._onDragEnd, this);
-
-    this._path._map.on(L.Draggable.MOVE[eventType], this._onDrag, this);
-    this._path
-      .on(L.Draggable.MOVE[eventType], this._onDrag, this)
-      .on(L.Draggable.END[eventType], this._onDragEnd, this);
+    L.DomEvent
+      .on(document, L.Draggable.MOVE[eventType], this._onDrag, this)
+      .on(document, L.Draggable.END[eventType], this._onDragEnd, this);
 
     if (this._path._map.dragging.enabled()) {
       this._mapDraggingWasEnabled = true;
@@ -110,15 +102,20 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
    * @param  {L.MouseEvent} evt
    */
   _onDrag: function(evt) {
-    var x = evt.containerPoint.x;
-    var y = evt.containerPoint.y;
+    L.DomEvent.stop(evt);
+
+    var first = (evt.touches && evt.touches.length === 1 ? evt.touches[0] : evt);
+    var containerPoint = this._path._map.mouseEventToContainerPoint(first);
+
+    var x = containerPoint.x;
+    var y = containerPoint.y;
 
     var dx = x - this._startPoint.x;
     var dy = y - this._startPoint.y;
 
     if (!this._path._dragMoved && (dx || dy)) {
       this._path._dragMoved = true;
-      this._path.fire('dragstart');
+      this._path.fire('dragstart', evt);
       // we don't want that to happen on click
       this._path.bringToFront();
     }
@@ -129,9 +126,9 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     this._startPoint.x = x;
     this._startPoint.y = y;
 
+    this._path.fire('predrag', evt);
     this._path.transform(this._matrix);
-    this._path.fire('drag');
-    L.DomEvent.stop(evt.originalEvent);
+    this._path.fire('drag', evt);
   },
 
   /**
@@ -139,7 +136,8 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
    * @param  {L.MouseEvent} evt
    */
   _onDragEnd: function(evt) {
-    var eventType = evt.originalEvent.type;
+    var eventType = evt.type;
+    var containerPoint = this._path._map.mouseEventToContainerPoint(evt);
 
     // apply matrix
     if (this.moved()) {
@@ -148,27 +146,14 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
       this._path.transform(null);
     }
 
-    // this._path._map.off(L.Draggable.MOVE[eventType], this._onDrag, this);
-    // this._path
-    //   .off(L.Draggable.MOVE[eventType], this._onDrag, this)
-    //   .off(L.Draggable.END[eventType], this._onDragEnd, this);
-
-    console.log(eventType, L.Draggable.END[eventType], L.Draggable.MOVE[eventType]);
-    for (var i in L.Draggable.MOVE) {
-      this._path._map.off(L.Draggable.MOVE[i], this._onDrag, this);
-      this._path.off(L.Draggable.MOVE[i], this._onDrag, this)
-        .off(L.Draggable.END[i], this._onUp, this);
-    }
-
-    // this._path._map.off('mousemove', this._onDrag, this);
-    // this._path
-    //   .off('mousemove', this._onDrag, this)
-    //   .off('mouseup', this._onDragEnd, this);
+    L.DomEvent
+      .off(document, 'mousemove touchmove', this._onDrag, this)
+      .off(document, 'mouseup touchend', this._onDragEnd, this);
 
     // consistency
     this._path.fire('dragend', {
       distance: Math.sqrt(
-        L.LineUtil._sqDist(this._dragStartPoint, evt.containerPoint)
+        L.LineUtil._sqDist(this._dragStartPoint, containerPoint)
       )
     });
 
@@ -177,6 +162,7 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     this._dragStartPoint = null;
 
     if (this._mapDraggingWasEnabled) {
+      console.log('enable map dragging');
       this._path._map.dragging.enable();
     }
   },
