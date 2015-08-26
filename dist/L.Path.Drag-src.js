@@ -152,7 +152,9 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
    */
   addHooks: function() {
     this._path.on('mousedown', this._onDragStart, this);
-    L.DomUtil.addClass(this._path._container, 'leaflet-path-draggable');
+    if (!L.Path.CANVAS) {
+      L.DomUtil.addClass(this._path._container, 'leaflet-path-draggable');
+    }
   },
 
   /**
@@ -160,7 +162,9 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
    */
   removeHooks: function() {
     this._path.off('mousedown', this._onDragStart, this);
-    L.DomUtil.removeClass(this._path._container, 'leaflet-path-draggable');
+    if (!L.Path.CANVAS) {
+      L.DomUtil.removeClass(this._path._container, 'leaflet-path-draggable');
+    }
   },
 
   /**
@@ -199,6 +203,11 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     if (!this._path._dragMoved && (dx || dy)) {
       this._path._dragMoved = true;
       this._path.fire('dragstart');
+
+      if (this._path._popup) {
+        this._path._popup._close();
+        this._path.off('click', this._path._openPopup, this._path);
+      }
     }
 
     this._matrix[4] += dx;
@@ -233,6 +242,12 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
         L.LineUtil._sqDist(this._dragStartPoint, evt.containerPoint)
       )
     });
+
+    if (this._path._popup) {
+      L.Util.requestAnimFrame(function() {
+        this._path.on('click', this._path._openPopup, this._path);
+      }, this);
+    }
 
     this._matrix = null;
     this._startPoint = null;
