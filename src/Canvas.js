@@ -12,6 +12,7 @@ L.Canvas.include({
     if (!this._containerCopy) {
       return;
     }
+
     delete this._containerCopy;
 
     if (layer._containsPoint_) {
@@ -47,6 +48,7 @@ L.Canvas.include({
 
     if (!copy) {
       copy = this._containerCopy = document.createElement('canvas');
+      document.body.appendChild(copy);
 
       copy.width = m * size.x;
       copy.height = m * size.y;
@@ -61,8 +63,11 @@ L.Canvas.include({
       layer._containsPoint = L.Util.trueFn;
     }
 
-    ctx.clearRect(pos.x * m, pos.y * m, size.x * m, size.y * m);
-    console.log(pos.x * m, pos.y * m, size.x * m, size.y * m);
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(pos.x, pos.y, size.x * m, size.y * m);
+    ctx.restore();
+
     ctx.save();
 
     ctx.drawImage(this._containerCopy, 0, 0, size.x, size.y);

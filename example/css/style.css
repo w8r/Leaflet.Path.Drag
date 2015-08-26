@@ -37,3 +37,10 @@ h2, h3 {
 }
 
 #controls .github-button { color: #fff; }
+
+@media screen and (min-width: 960px) {
+  #controls {
+    display: block;
+    z-index: 999;
+  }
+}

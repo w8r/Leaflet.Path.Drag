@@ -55,218 +55,232 @@ L.Path.include({
  */
 L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
 
-	/**
-	 * @param  {L.Path} path
-	 * @constructor
-	 */
-	initialize: function(path) {
+  /**
+   * @param  {L.Path} path
+   * @constructor
+   */
+  initialize: function(path) {
 
-		/**
-		 * @type {L.Path}
-		 */
-		this._path = path;
+    /**
+     * @type {L.Path}
+     */
+    this._path = path;
 
-		/**
-		 * @type {Array.<Number>}
-		 */
-		this._matrix = null;
+    /**
+     * @type {Array.<Number>}
+     */
+    this._matrix = null;
 
-		/**
-		 * @type {L.Point}
-		 */
-		this._startPoint = null;
+    /**
+     * @type {L.Point}
+     */
+    this._startPoint = null;
 
-		/**
-		 * @type {L.Point}
-		 */
-		this._dragStartPoint = null;
+    /**
+     * @type {L.Point}
+     */
+    this._dragStartPoint = null;
 
-		/**
-		 * @type {Boolean}
-		 */
-		this._mapDraggingWasEnabled = false;
+    /**
+     * @type {Boolean}
+     */
+    this._mapDraggingWasEnabled = false;
 
-	},
+  },
 
-	/**
-	 * Enable dragging
-	 */
-	addHooks: function() {
-		this._path.on('mousedown', this._onDragStart, this);
-		if (this._path._path) {
-			L.DomUtil.addClass(this._path._path, 'leaflet-path-draggable');
-		}
-	},
+  /**
+   * Enable dragging
+   */
+  addHooks: function() {
+    this._path.on('mousedown', this._onDragStart, this);
+    if (this._path._path) {
+      L.DomUtil.addClass(this._path._path, 'leaflet-path-draggable');
+    }
+  },
 
-	/**
-	 * Disable dragging
-	 */
-	removeHooks: function() {
-		this._path.off('mousedown', this._onDragStart, this);
-		if (this._path._path) {
-			L.DomUtil.removeClass(this._path._path, 'leaflet-path-draggable');
-		}
-	},
+  /**
+   * Disable dragging
+   */
+  removeHooks: function() {
+    this._path.off('mousedown', this._onDragStart, this);
+    if (this._path._path) {
+      L.DomUtil.removeClass(this._path._path, 'leaflet-path-draggable');
+    }
+  },
 
-	/**
-	 * @return {Boolean}
-	 */
-	moved: function() {
-		return this._path._dragMoved;
-	},
+  /**
+   * @return {Boolean}
+   */
+  moved: function() {
+    return this._path._dragMoved;
+  },
 
-	/**
-	 * Start drag
-	 * @param  {L.MouseEvent} evt
-	 */
-	_onDragStart: function(evt) {
-		this._mapDraggingWasEnabled = false;
-		this._startPoint = evt.containerPoint.clone();
-		this._dragStartPoint = evt.containerPoint.clone();
-		this._matrix = [1, 0, 0, 1, 0, 0];
-		L.DomEvent.stop(evt.originalEvent);
+  /**
+   * Start drag
+   * @param  {L.MouseEvent} evt
+   */
+  _onDragStart: function(evt) {
+    var eventType = evt.originalEvent._simulated ? 'touchstart' : evt.originalEvent.type;
 
-		L.DomUtil.addClass(this._path._renderer._container, 'leaflet-interactive');
+    this._mapDraggingWasEnabled = false;
+    this._startPoint = evt.containerPoint.clone();
+    this._dragStartPoint = evt.containerPoint.clone();
+    this._matrix = [1, 0, 0, 1, 0, 0];
+    L.DomEvent.stop(evt.originalEvent);
 
-		this._path._map.on('mousemove', this._onDrag, this);
-		this._path
-			.on('mousemove', this._onDrag, this)
-			.on('mouseup', this._onDragEnd, this);
+    L.DomUtil.addClass(this._path._renderer._container, 'leaflet-interactive');
+    L.DomEvent
+      .on(document, L.Draggable.MOVE[eventType], this._onDrag, this)
+      .on(document, L.Draggable.END[eventType], this._onDragEnd, this);
 
-		if (this._path._map.dragging.enabled()) {
-			this._mapDraggingWasEnabled = true;
-			this._path._map.dragging.disable();
-		}
-		this._path._dragMoved = false;
-	},
+    if (this._path._map.dragging.enabled()) {
+      // I guess it's required because mousdown gets simulated with a delay
+      this._path._map.dragging._draggable._onUp();
 
-	/**
-	 * Dragging
-	 * @param  {L.MouseEvent} evt
-	 */
-	_onDrag: function(evt) {
-		var x = evt.containerPoint.x;
-		var y = evt.containerPoint.y;
+      this._path._map.dragging.disable();
+      this._mapDraggingWasEnabled = true;
+    }
+    this._path._dragMoved = false;
 
-		var dx = x - this._startPoint.x;
-		var dy = y - this._startPoint.y;
+    if (this._path._popup) { // that might be a case on touch devices as well
+      this._path._popup._close();
+    }
+  },
 
-		if (!this._path._dragMoved && (dx || dy)) {
-			this._path._dragMoved = true;
-			this._path.fire('dragstart');
-			// we don't want that to happen on click
-			this._path.bringToFront();
-		}
+  /**
+   * Dragging
+   * @param  {L.MouseEvent} evt
+   */
+  _onDrag: function(evt) {
+    L.DomEvent.stop(evt);
 
-		this._matrix[4] += dx;
-		this._matrix[5] += dy;
+    var first = (evt.touches && evt.touches.length === 1 ? evt.touches[0] : evt);
+    var containerPoint = this._path._map.mouseEventToContainerPoint(first);
 
-		this._startPoint.x = x;
-		this._startPoint.y = y;
+    var x = containerPoint.x;
+    var y = containerPoint.y;
 
-		this._path.transform(this._matrix);
-		this._path.fire('drag');
-		L.DomEvent.stop(evt.originalEvent);
-	},
+    var dx = x - this._startPoint.x;
+    var dy = y - this._startPoint.y;
 
-	/**
-	 * Dragging stopped, apply
-	 * @param  {L.MouseEvent} evt
-	 */
-	_onDragEnd: function(evt) {
-		// apply matrix
-		if (this.moved()) {
-			this._transformPoints(this._matrix);
-			this._path._project();
-			this._path.transform(null);
-		}
+    if (!this._path._dragMoved && (dx || dy)) {
+      this._path._dragMoved = true;
+      this._path.fire('dragstart', evt);
+      // we don't want that to happen on click
+      this._path.bringToFront();
+    }
 
-		this._path._map.off('mousemove', this._onDrag, this);
-		this._path
-			.off('mousemove', this._onDrag, this)
-			.off('mouseup', this._onDragEnd, this);
+    this._matrix[4] += dx;
+    this._matrix[5] += dy;
 
-		// consistency
-		this._path.fire('dragend', {
-			distance: Math.sqrt(
-				L.LineUtil._sqDist(this._dragStartPoint, evt.containerPoint)
-			)
-		});
+    this._startPoint.x = x;
+    this._startPoint.y = y;
 
-		this._matrix = null;
-		this._startPoint = null;
-		this._dragStartPoint = null;
+    this._path.fire('predrag', evt);
+    this._path.transform(this._matrix);
+    this._path.fire('drag', evt);
+  },
 
-		if (this._mapDraggingWasEnabled) {
-			this._path._map.dragging.enable();
-		}
-	},
+  /**
+   * Dragging stopped, apply
+   * @param  {L.MouseEvent} evt
+   */
+  _onDragEnd: function(evt) {
+    var eventType = evt.type;
+    var containerPoint = this._path._map.mouseEventToContainerPoint(evt);
 
-	/**
-	 * Applies transformation, does it in one sweep for performance,
-	 * so don't be surprised about the code repetition.
-	 *
-	 * [ x ]   [ a  b  tx ] [ x ]   [ a * x + b * y + tx ]
-	 * [ y ] = [ c  d  ty ] [ y ] = [ c * x + d * y + ty ]
-	 *
-	 * @param {Array.<Number>} matrix
-	 */
-	_transformPoints: function(matrix) {
-		var path = this._path;
-		var i, len, latlng;
+    // apply matrix
+    if (this.moved()) {
+      this._transformPoints(this._matrix);
+      this._path._project();
+      this._path.transform(null);
+    }
 
-		var px = L.point(matrix[4], matrix[5]);
+    L.DomEvent
+      .off(document, 'mousemove touchmove', this._onDrag, this)
+      .off(document, 'mouseup touchend', this._onDragEnd, this);
 
-		var crs = path._map.options.crs;
-		var transformation = crs.transformation;
-		var scale = crs.scale(path._map.getZoom());
-		var projection = crs.projection;
+    // consistency
+    this._path.fire('dragend', {
+      distance: Math.sqrt(
+        L.LineUtil._sqDist(this._dragStartPoint, containerPoint)
+      )
+    });
 
-		var diff = transformation.untransform(px, scale)
-			.subtract(transformation.untransform(L.point(0, 0), scale));
+    this._matrix = null;
+    this._startPoint = null;
+    this._dragStartPoint = null;
 
-		path._bounds = new L.LatLngBounds();
+    if (this._mapDraggingWasEnabled) {
+      this._path._map.dragging.enable();
+    }
+  },
 
-		// console.time('transform');
-		// all shifts are in-place
-		if (path._point) { // L.Circle
-			path._latlng = projection.unproject(
-				projection.project(path._latlng)._add(diff));
-			path._point._add(px);
-		} else if (path._rings || path._parts) { // everything else
-			var rings = path._rings || path._parts;
-			var latlngs = path._latlngs;
-			if (!L.Util.isArray(latlngs[0])) { // polyline
-				latlngs = [latlngs];
-			}
-			for (i = 0, len = rings.length; i < len; i++) {
-				for (var j = 0, jj = rings[i].length; j < jj; j++) {
-					latlng = latlngs[i][j];
-					latlngs[i][j] = projection
-						.unproject(projection.project(latlng)._add(diff));
-					path._bounds.extend(latlngs[i][j]);
-					rings[i][j]._add(px);
-				}
-			}
-		}
-		// console.timeEnd('transform');
+  /**
+   * Applies transformation, does it in one sweep for performance,
+   * so don't be surprised about the code repetition.
+   *
+   * [ x ]   [ a  b  tx ] [ x ]   [ a * x + b * y + tx ]
+   * [ y ] = [ c  d  ty ] [ y ] = [ c * x + d * y + ty ]
+   *
+   * @param {Array.<Number>} matrix
+   */
+  _transformPoints: function(matrix) {
+    var path = this._path;
+    var i, len, latlng;
 
-		path._updatePath();
-	}
+    var px = L.point(matrix[4], matrix[5]);
+
+    var crs = path._map.options.crs;
+    var transformation = crs.transformation;
+    var scale = crs.scale(path._map.getZoom());
+    var projection = crs.projection;
+
+    var diff = transformation.untransform(px, scale)
+      .subtract(transformation.untransform(L.point(0, 0), scale));
+
+    path._bounds = new L.LatLngBounds();
+
+    // console.time('transform');
+    // all shifts are in-place
+    if (path._point) { // L.Circle
+      path._latlng = projection.unproject(
+        projection.project(path._latlng)._add(diff));
+      path._point._add(px);
+    } else if (path._rings || path._parts) { // everything else
+      var rings = path._rings || path._parts;
+      var latlngs = path._latlngs;
+      if (!L.Util.isArray(latlngs[0])) { // polyline
+        latlngs = [latlngs];
+      }
+      for (i = 0, len = rings.length; i < len; i++) {
+        for (var j = 0, jj = rings[i].length; j < jj; j++) {
+          latlng = latlngs[i][j];
+          latlngs[i][j] = projection
+            .unproject(projection.project(latlng)._add(diff));
+          path._bounds.extend(latlngs[i][j]);
+          rings[i][j]._add(px);
+        }
+      }
+    }
+    // console.timeEnd('transform');
+
+    path._updatePath();
+  }
 
 });
 
 L.Path.addInitHook(function() {
-	if (this.options.draggable) {
-		if (this.dragging) {
-			this.dragging.enable();
-		} else {
-			this.dragging = new L.Handler.PathDrag(this);
-			this.dragging.enable();
-		}
-	} else if (this.dragging) {
-		this.dragging.disable();
-	}
+  if (this.options.draggable) {
+    if (this.dragging) {
+      this.dragging.enable();
+    } else {
+      this.dragging = new L.Handler.PathDrag(this);
+      this.dragging.enable();
+    }
+  } else if (this.dragging) {
+    this.dragging.disable();
+  }
 });
 L.SVG.include({
 
@@ -346,76 +360,88 @@ L.SVG.include(!L.Browser.vml ? {} : {
 
 });
 L.Util.trueFn = function() {
-	return true;
+  return true;
 };
 
 L.Canvas.include({
 
-	/**
-	 * Do nothing
-	 * @param  {L.Path} layer
-	 */
-	_resetTransformPath: function(layer) {
-		if (!this._containerCopy) {
-			return;
-		}
-		delete this._containerCopy;
+  /**
+   * Do nothing
+   * @param  {L.Path} layer
+   */
+  _resetTransformPath: function(layer) {
+    if (!this._containerCopy) {
+      return;
+    }
 
-		if (layer._containsPoint_) {
-			layer._containsPoint = layer._containsPoint_;
-			delete layer._containsPoint_;
+    delete this._containerCopy;
 
-			this._requestRedraw(layer);
-			this._draw(true);
-		}
-	},
+    if (layer._containsPoint_) {
+      layer._containsPoint = layer._containsPoint_;
+      delete layer._containsPoint_;
 
-	/**
-	 * Algorithm outline:
-	 *
-	 * 1. pre-transform - clear the path out of the canvas, copy canvas state
-	 * 2. at every frame:
-	 *    2.1. save
-	 *    2.2. redraw the canvas from saved one
-	 *    2.3. transform
-	 *    2.4. draw path
-	 *    2.5. restore
-	 *
-	 * @param  {L.Path} layer
-	 * @param  {Array.<Number>} matrix
-	 */
-	transformPath: function(layer, matrix) {
-		var copy = this._containerCopy;
-		var ctx = this._ctx;
+      this._requestRedraw(layer);
+      this._draw(true);
+    }
+  },
 
-		if (!copy) {
-			copy = this._containerCopy = document.createElement('canvas');
-			copy.width = this._container.width;
-			copy.height = this._container.height;
+  /**
+   * Algorithm outline:
+   *
+   * 1. pre-transform - clear the path out of the canvas, copy canvas state
+   * 2. at every frame:
+   *    2.1. save
+   *    2.2. redraw the canvas from saved one
+   *    2.3. transform
+   *    2.4. draw path
+   *    2.5. restore
+   *
+   * @param  {L.Path} layer
+   * @param  {Array.<Number>} matrix
+   */
+  transformPath: function(layer, matrix) {
+    var copy = this._containerCopy;
+    var ctx = this._ctx;
+    var m = L.Browser.retina ? 2 : 1;
+    var bounds = this._bounds;
+    var size = bounds.getSize();
+    var pos = L.DomUtil.getPosition(this._container);
 
-			layer._removed = true;
-			this._redraw();
+    if (!copy) {
+      copy = this._containerCopy = document.createElement('canvas');
+      document.body.appendChild(copy);
 
-			copy.getContext('2d').translate(this._bounds.min.x, this._bounds.min.y);
-			copy.getContext('2d').drawImage(this._container, 0, 0);
-			this._initPath(layer);
-			layer._containsPoint_ = layer._containsPoint;
-			layer._containsPoint = L.Util.trueFn;
-		}
+      copy.width = m * size.x;
+      copy.height = m * size.y;
 
-		ctx.save();
-		ctx.clearRect(0, 0, copy.width, copy.height);
-		ctx.drawImage(this._containerCopy, 0, 0);
-		ctx.transform.apply(this._ctx, matrix);
+      layer._removed = true;
+      this._redraw();
 
-		var layers = this._layers;
-		this._layers = {};
+      copy.getContext('2d').translate(m * bounds.min.x, m * bounds.min.y);
+      copy.getContext('2d').drawImage(this._container, 0, 0);
+      this._initPath(layer);
+      layer._containsPoint_ = layer._containsPoint;
+      layer._containsPoint = L.Util.trueFn;
+    }
 
-		this._initPath(layer);
-		layer._updatePath();
+    ctx.save();
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
+    ctx.clearRect(pos.x, pos.y, size.x * m, size.y * m);
+    ctx.restore();
 
-		this._layers = layers;
-		ctx.restore();
-	}
+    ctx.save();
+
+    ctx.drawImage(this._containerCopy, 0, 0, size.x, size.y);
+    ctx.transform.apply(ctx, matrix);
+
+    var layers = this._layers;
+    this._layers = {};
+
+    this._initPath(layer);
+    layer._updatePath();
+
+    this._layers = layers;
+    ctx.restore();
+  }
 
 });

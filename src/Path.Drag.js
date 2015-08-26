@@ -91,10 +91,17 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
       .on(document, L.Draggable.END[eventType], this._onDragEnd, this);
 
     if (this._path._map.dragging.enabled()) {
-      this._mapDraggingWasEnabled = true;
+      // I guess it's required because mousdown gets simulated with a delay
+      this._path._map.dragging._draggable._onUp();
+
       this._path._map.dragging.disable();
+      this._mapDraggingWasEnabled = true;
     }
     this._path._dragMoved = false;
+
+    if (this._path._popup) { // that might be a case on touch devices as well
+      this._path._popup._close();
+    }
   },
 
   /**
@@ -162,7 +169,6 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     this._dragStartPoint = null;
 
     if (this._mapDraggingWasEnabled) {
-      console.log('enable map dragging');
       this._path._map.dragging.enable();
     }
   },

@@ -187,7 +187,7 @@ var multiPolygon = global.multiPolygon = new L.Polygon([
   ])
 ], {
   draggable: true,
-  renderer: renderer,
+  // renderer: renderer,
   color: '#092'
 }).bindPopup('MultiPolygon').addTo(map);
 
