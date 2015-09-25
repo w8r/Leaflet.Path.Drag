@@ -154,7 +154,7 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
   _onDrag: function(evt) {
     L.DomEvent.stop(evt);
 
-    var first = (evt.touches && evt.touches.length === 1 ? evt.touches[0] : evt);
+    var first = (evt.touches && evt.touches.length >= 1 ? evt.touches[0] : evt);
     var containerPoint = this._path._map.mouseEventToContainerPoint(first);
 
     var x = containerPoint.x;
