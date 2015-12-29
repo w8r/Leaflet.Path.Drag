@@ -261,7 +261,7 @@ L.Circle.prototype.getLatLng = function() {
   }
 };
 
-L.Polyline.prototype._getLatLngs = L.Polyline.prototype.getLatLngs();
+L.Polyline.prototype._getLatLngs = L.Polyline.prototype.getLatLngs;
 L.Polyline.prototype.getLatLngs = function() {
   if (this.dragging && this.dragging.inProgress()) {
     var points = this._getLatLngs();
