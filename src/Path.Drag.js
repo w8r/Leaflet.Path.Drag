@@ -149,17 +149,13 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
   },
 
   /**
-   * Applies transformation, does it in one sweep for performance,
-   * so don't be surprised about the code repetition.
+   * Transforms point according to the provided transformation matrix.
    *
-   * [ x ]   [ a  b  tx ] [ x ]   [ a * x + b * y + tx ]
-   * [ y ] = [ c  d  ty ] [ y ] = [ c * x + d * y + ty ]
-   *
-   * @param {Array.<Number>} matrix
+   *  @param {Array.<Number>} matrix
+   *  @param {L.LatLng} point
    */
-  _transformPoints: function(matrix) {
+  _transformPoint: function(matrix, point) {
     var path = this._path;
-    var i, len, latlng;
 
     var px = L.point(matrix[4], matrix[5]);
 
@@ -171,18 +167,31 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     var diff = transformation.untransform(px, scale)
       .subtract(transformation.untransform(L.point(0, 0), scale));
 
-    // console.time('transform');
+    return projection.unproject(projection.project(point)._add(diff));
+  },
+
+  /**
+   * Applies transformation, does it in one sweep for performance,
+   * so don't be surprised about the code repetition.
+   *
+   * [ x ]   [ a  b  tx ] [ x ]   [ a * x + b * y + tx ]
+   * [ y ] = [ c  d  ty ] [ y ] = [ c * x + d * y + ty ]
+   *
+   * @param {Array.<Number>} matrix
+   */
+  _transformPoints: function(matrix) {
+    var path = this._path;
+    var i, len;
+
+    var px = L.point(matrix[4], matrix[5]);
 
     // all shifts are in-place
     if (path._point) { // L.Circle
-      path._latlng = projection.unproject(
-        projection.project(path._latlng)._add(diff));
+      path._latlng = this._transformPoint(matrix, path._latlng);
       path._point._add(px);
     } else if (path._originalPoints) { // everything else
       for (i = 0, len = path._originalPoints.length; i < len; i++) {
-        latlng = path._latlngs[i];
-        path._latlngs[i] = projection
-          .unproject(projection.project(latlng)._add(diff));
+        path._latlngs[i] = this._transformPoint(matrix, path._latlngs[i]);
         path._originalPoints[i]._add(px);
       }
     }
@@ -191,9 +200,7 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     if (path._holes) {
       for (i = 0, len = path._holes.length; i < len; i++) {
         for (var j = 0, len2 = path._holes[i].length; j < len2; j++) {
-          latlng = path._holes[i][j];
-          path._holes[i][j] = projection
-            .unproject(projection.project(latlng)._add(diff));
+          path._holes[i][j] =this._transformPoint(matrix, path._holes[i][j]);
           path._holePoints[i][j]._add(px);
         }
       }
