@@ -38,6 +38,11 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
      */
     this._dragStartPoint = null;
 
+    /**
+     * @type {Boolean}
+     */
+    this._dragInProgress = false;
+
   },
 
   /**
@@ -68,10 +73,20 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
   },
 
   /**
+   * If dragging currently in progress.
+   *
+   * @return {Boolean}
+   */
+  inProgress: function() {
+    return this._dragInProgress;
+  },
+
+  /**
    * Start drag
    * @param  {L.MouseEvent} evt
    */
   _onDragStart: function(evt) {
+    this._dragInProgress = true;
     this._startPoint = evt.containerPoint.clone();
     this._dragStartPoint = evt.containerPoint.clone();
     this._matrix = [1, 0, 0, 1, 0, 0];
@@ -120,6 +135,7 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
    */
   _onDragEnd: function(evt) {
     L.DomEvent.stop(evt);
+    this._dragInProgress = false;
     // undo container transform
     this._path._resetTransform();
     // apply matrix
@@ -228,3 +244,33 @@ L.Path.prototype._initEvents = function() {
     this.dragging.disable();
   }
 };
+
+/*
+ * Return transformed points in case if dragging is enabled and in progress,
+ * otherwise - call original method.
+ *
+ * For L.Circle and L.Polyline
+ */
+
+L.Circle.prototype._getLatLng = L.Circle.prototype.getLatLng;
+L.Circle.prototype.getLatLng = function() {
+  if (this.dragging && this.dragging.inProgress()) {
+    return this.dragging._transformPoint(this.dragging._matrix, this._latlng);
+  } else {
+    return this._getLatLng();
+  }
+};
+
+L.Polyline.prototype._getLatLngs = L.Polyline.prototype.getLatLngs();
+L.Polyline.prototype.getLatLngs = function() {
+  if (this.dragging && this.dragging.inProgress()) {
+    var points = this._getLatLngs();
+    points.forEach(function (point, i) {
+      points[i] = this.dragging._transformPoint(this.dragging._matrix, point);
+    }.bind(this));
+    return points;
+  } else {
+    return this._getLatLngs();
+  }
+};
+
