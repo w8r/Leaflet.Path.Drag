@@ -33,6 +33,8 @@ require('leaflet');
 var handler = require('leaflet-path-drag');
 ```
 
+For Leaflet@1.x support use code from `leaflet-1.0` branch, there's also support for Canvas renderer, but it's buggy on touch devices
+
 ## Info
 
 It uses matrix transforms on SVG/VML paths, so part of it(`src/L.Path.Transform`) could be used for different transformations - skew/scale/etc - but you have to provide coordinates projection and handling yourself.
