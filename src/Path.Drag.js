@@ -170,7 +170,7 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
    *  @param {Array.<Number>} matrix
    *  @param {L.LatLng} point
    */
-  _transformPoint: function(matrix, point) {
+  _transformPoint: function(point, matrix) {
     var path = this._path;
 
     var px = L.point(matrix[4], matrix[5]);
@@ -197,17 +197,30 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
    */
   _transformPoints: function(matrix) {
     var path = this._path;
-    var i, len;
+    var i, len, latlng;
 
     var px = L.point(matrix[4], matrix[5]);
 
+    var crs = path._map.options.crs;
+    var transformation = crs.transformation;
+    var scale = crs.scale(path._map.getZoom());
+    var projection = crs.projection;
+
+    var diff = transformation.untransform(px, scale)
+      .subtract(transformation.untransform(L.point(0, 0), scale));
+
+    // console.time('transform');
+
     // all shifts are in-place
     if (path._point) { // L.Circle
-      path._latlng = this._transformPoint(matrix, path._latlng);
+      path._latlng = projection.unproject(
+        projection.project(path._latlng)._add(diff));
       path._point._add(px);
     } else if (path._originalPoints) { // everything else
       for (i = 0, len = path._originalPoints.length; i < len; i++) {
-        path._latlngs[i] = this._transformPoint(matrix, path._latlngs[i]);
+        latlng = path._latlngs[i];
+        path._latlngs[i] = projection
+          .unproject(projection.project(latlng)._add(diff));
         path._originalPoints[i]._add(px);
       }
     }
@@ -216,7 +229,9 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     if (path._holes) {
       for (i = 0, len = path._holes.length; i < len; i++) {
         for (var j = 0, len2 = path._holes[i].length; j < len2; j++) {
-          path._holes[i][j] =this._transformPoint(matrix, path._holes[i][j]);
+          latlng = path._holes[i][j];
+          path._holes[i][j] = projection
+            .unproject(projection.project(latlng)._add(diff));
           path._holePoints[i][j]._add(px);
         }
       }
@@ -255,7 +270,7 @@ L.Path.prototype._initEvents = function() {
 L.Circle.prototype._getLatLng = L.Circle.prototype.getLatLng;
 L.Circle.prototype.getLatLng = function() {
   if (this.dragging && this.dragging.inProgress()) {
-    return this.dragging._transformPoint(this.dragging._matrix, this._latlng);
+    return this.dragging._transformPoint(this._latlng, this.dragging._matrix);
   } else {
     return this._getLatLng();
   }
@@ -264,10 +279,11 @@ L.Circle.prototype.getLatLng = function() {
 L.Polyline.prototype._getLatLngs = L.Polyline.prototype.getLatLngs;
 L.Polyline.prototype.getLatLngs = function() {
   if (this.dragging && this.dragging.inProgress()) {
+    var matrix = this.dragging._matrix;
     var points = this._getLatLngs();
-    points.forEach(function (point, i) {
-      points[i] = this.dragging._transformPoint(this.dragging._matrix, point);
-    }.bind(this));
+    for (var i = 0, len = points.length; i < len; i++) {
+      points[i] = this.dragging._transformPoint(points[i], matrix);
+    }
     return points;
   } else {
     return this._getLatLngs();
