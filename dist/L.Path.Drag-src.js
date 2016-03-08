@@ -219,6 +219,10 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     this._dragStartPoint = evt.containerPoint.clone();
     this._matrix = [1, 0, 0, 1, 0, 0];
 
+    if(this._path._point) {
+      this._point = this._path._point.clone();
+    }
+
     this._path._map
       .on('mousemove', this._onDrag, this)
       .on('mouseup', this._onDragEnd, this)
@@ -234,27 +238,37 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     var x = evt.containerPoint.x;
     var y = evt.containerPoint.y;
 
-    var dx = x - this._startPoint.x;
-    var dy = y - this._startPoint.y;
+    var matrix     = this._matrix;
+    var path       = this._path;
+    var startPoint = this._startPoint;
 
-    if (!this._path._dragMoved && (dx || dy)) {
-      this._path._dragMoved = true;
-      this._path.fire('dragstart');
+    var dx = x - startPoint.x;
+    var dy = y - startPoint.y;
 
-      if (this._path._popup) {
-        this._path._popup._close();
-        this._path.off('click', this._path._openPopup, this._path);
+    if (!path._dragMoved && (dx || dy)) {
+      path._dragMoved = true;
+      path.fire('dragstart');
+
+      if (path._popup) {
+        path._popup._close();
+        path.off('click', path._openPopup, path);
       }
     }
 
-    this._matrix[4] += dx;
-    this._matrix[5] += dy;
+    matrix[4] += dx;
+    matrix[5] += dy;
 
-    this._startPoint.x = x;
-    this._startPoint.y = y;
+    startPoint.x = x;
+    startPoint.y = y;
 
-    this._path._applyTransform(this._matrix);
-    this._path.fire('drag');
+    path._applyTransform(matrix);
+
+    if (path._point) { // L.Circle, L.CircleMarker
+      path._point.x = this._point.x + dx;
+      path._point.y = this._point.y + dy;
+    }
+
+    path.fire('drag');
     L.DomEvent.stop(evt.originalEvent);
   },
 
@@ -290,6 +304,7 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
 
     this._matrix = null;
     this._startPoint = null;
+    this._point = null;
     this._dragStartPoint = null;
     this._path._dragMoved = false;
   },
@@ -347,7 +362,7 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     if (path._point) { // L.Circle
       path._latlng = projection.unproject(
         projection.project(path._latlng)._add(diff));
-      path._point._add(px);
+      path._point = this._point._add(px);
     } else if (path._originalPoints) { // everything else
       for (i = 0, len = path._originalPoints.length; i < len; i++) {
         latlng = path._latlngs[i];
