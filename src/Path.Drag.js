@@ -58,8 +58,8 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     var path      = this._path._path;
 
     this._path.on('mousedown', this._onDragStart, this);
-    this._path.options.className = this._path.options.className || '';
-    this._path.options.className += ' ' + className;
+    this._path.options.className =
+      (this._path.options.className || '') + ' ' + className;
 
     if (!L.Path.CANVAS && path) {
       L.DomUtil.addClass(path, className);
@@ -75,7 +75,8 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     var path      = this._path._path;
 
     this._path.off('mousedown', this._onDragStart, this);
-    this._path.options.className.replace(className, '');
+    this._path.options.className =
+      (this._path.options.className || '').replace(className, '');
 
     if (!L.Path.CANVAS && path) {
       L.DomUtil.removeClass(path, className);
