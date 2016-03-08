@@ -12,6 +12,10 @@
  */
 L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
 
+  statics: {
+    DRAGGABLE_CLS: 'leaflet-path-draggable'
+  },
+
   /**
    * @param  {L.Path} path
    * @constructor
@@ -45,25 +49,39 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
 
   },
 
+
   /**
    * Enable dragging
    */
   addHooks: function() {
+    var className = L.Handler.PathDrag.DRAGGABLE_CLS;
+    var path      = this._path._path;
+
     this._path.on('mousedown', this._onDragStart, this);
-    if (!L.Path.CANVAS) {
-      L.DomUtil.addClass(this._path._container, 'leaflet-path-draggable');
+    this._path.options.className = this._path.options.className || '';
+    this._path.options.className += ' ' + className;
+
+    if (!L.Path.CANVAS && path) {
+      L.DomUtil.addClass(path, className);
     }
   },
+
 
   /**
    * Disable dragging
    */
   removeHooks: function() {
+    var className = L.Handler.PathDrag.DRAGGABLE_CLS;
+    var path      = this._path._path;
+
     this._path.off('mousedown', this._onDragStart, this);
-    if (!L.Path.CANVAS) {
-      L.DomUtil.removeClass(this._path._container, 'leaflet-path-draggable');
+    this._path.options.className.replace(className, '');
+
+    if (!L.Path.CANVAS && path) {
+      L.DomUtil.removeClass(path, className);
     }
   },
+
 
   /**
    * @return {Boolean}
@@ -71,6 +89,7 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
   moved: function() {
     return this._path._dragMoved;
   },
+
 
   /**
    * If dragging currently in progress.
@@ -80,6 +99,7 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
   inProgress: function() {
     return this._dragInProgress;
   },
+
 
   /**
    * Start drag
@@ -96,6 +116,7 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
       .on('mouseup', this._onDragEnd, this)
     this._path._dragMoved = false;
   },
+
 
   /**
    * Dragging
@@ -128,6 +149,7 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     this._path.fire('drag');
     L.DomEvent.stop(evt.originalEvent);
   },
+
 
   /**
    * Dragging stopped, apply
@@ -164,6 +186,7 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     this._path._dragMoved = false;
   },
 
+
   /**
    * Transforms point according to the provided transformation matrix.
    *
@@ -185,6 +208,7 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
 
     return projection.unproject(projection.project(point)._add(diff));
   },
+
 
   /**
    * Applies transformation, does it in one sweep for performance,
@@ -244,10 +268,9 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
 
 });
 
-L.Path.prototype.__initEvents = L.Path.prototype._initEvents;
-L.Path.prototype._initEvents = function() {
-  this.__initEvents();
 
+// Init hook instead of replacing the `initEvents`
+L.Path.addInitHook(function() {
   if (this.options.draggable) {
     if (this.dragging) {
       this.dragging.enable();
@@ -258,7 +281,7 @@ L.Path.prototype._initEvents = function() {
   } else if (this.dragging) {
     this.dragging.disable();
   }
-};
+});
 
 /*
  * Return transformed points in case if dragging is enabled and in progress,
@@ -267,6 +290,8 @@ L.Path.prototype._initEvents = function() {
  * For L.Circle and L.Polyline
  */
 
+// don't like this? me neither, but I like it even less
+// when the original methods are not exposed
 L.Circle.prototype._getLatLng = L.Circle.prototype.getLatLng;
 L.Circle.prototype.getLatLng = function() {
   if (this.dragging && this.dragging.inProgress()) {
@@ -275,6 +300,7 @@ L.Circle.prototype.getLatLng = function() {
     return this._getLatLng();
   }
 };
+
 
 L.Polyline.prototype._getLatLngs = L.Polyline.prototype.getLatLngs;
 L.Polyline.prototype.getLatLngs = function() {
