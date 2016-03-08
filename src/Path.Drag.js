@@ -157,8 +157,8 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     path._applyTransform(matrix);
 
     if (path._point) { // L.Circle, L.CircleMarker
-      path._point.x = this._point.x + dx;
-      path._point.y = this._point.y + dy;
+      path._point.x = this._point.x + matrix[4];
+      path._point.y = this._point.y + matrix[5];
     }
 
     path.fire('drag');
