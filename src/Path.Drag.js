@@ -178,6 +178,8 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
    */
   _onDragEnd: function(evt) {
     L.DomEvent.stop(evt);
+    L.DomEvent._fakeStop({ type: 'click' });
+
     this._dragInProgress = false;
     // undo container transform
     this._path._resetTransform();
@@ -336,4 +338,3 @@ L.Polyline.prototype.getLatLngs = function() {
     return this._getLatLngs();
   }
 };
-
