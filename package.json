@@ -29,7 +29,7 @@
     "url": "https://github.com/w8r/Leaflet.Path.Drag/issues"
   },
   "dependencies": {
-    "leaflet": "^1.0.0-beta.1"
+    "leaflet": "^1.0.0-beta.2"
   },
   "devDependencies": {
     "browserify": "^8.1.1",

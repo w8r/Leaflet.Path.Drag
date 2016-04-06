@@ -44,7 +44,7 @@ L.Canvas.include({
     var m = L.Browser.retina ? 2 : 1;
     var bounds = this._bounds;
     var size = bounds.getSize();
-    var pos = L.DomUtil.getPosition(this._container);
+    var pos = bounds.min;
 
     if (!copy) {
       copy = this._containerCopy = document.createElement('canvas');
@@ -64,10 +64,9 @@ L.Canvas.include({
     }
 
     ctx.save();
-    ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.clearRect(pos.x, pos.y, size.x * m, size.y * m);
+    ctx.setTransform(1, 0, 0, 1, 0, 0);
     ctx.restore();
-
     ctx.save();
 
     ctx.drawImage(this._containerCopy, 0, 0, size.x, size.y);
