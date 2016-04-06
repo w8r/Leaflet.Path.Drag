@@ -134,7 +134,7 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     this._startPoint.y = y;
 
     this._path.fire('predrag', evt);
-    this._path.transform(this._matrix);
+    this._path._transform(this._matrix);
     this._path.fire('drag', evt);
   },
 
@@ -150,7 +150,7 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     if (this.moved()) {
       this._transformPoints(this._matrix);
       this._path._project();
-      this._path.transform(null);
+      this._path._transform(null);
     }
 
     L.DomEvent

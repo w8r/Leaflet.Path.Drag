@@ -1,9 +1,6 @@
 /**
  * Matrix transform path for SVG/VML
- * TODO: adapt to Leaflet 0.8 upon release
  */
-
-"use strict";
 
 // Renderer-independent
 L.Path.include({
@@ -12,7 +9,7 @@ L.Path.include({
 	 * Applies matrix transformation to SVG
 	 * @param {Array.<Number>?} matrix
 	 */
-	transform: function(matrix) {
+	_transform: function(matrix) {
 		if (this._renderer) {
 			if (matrix) {
 				this._renderer.transformPath(this, matrix);
