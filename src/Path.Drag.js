@@ -12,6 +12,11 @@
  */
 L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
 
+  statics: {
+    DRAGGING_CLS: 'leaflet-path-draggable'
+  },
+
+
   /**
    * @param  {L.Path} path
    * @constructor
@@ -50,8 +55,13 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
    */
   addHooks: function() {
     this._path.on('mousedown', this._onDragStart, this);
+
+    this._path.options.className = this._path.options.className ?
+        (this._path.options.className + ' ' + L.Handler.PathDrag.DRAGGING_CLS) :
+         L.Handler.PathDrag.DRAGGING_CLS;
+
     if (this._path._path) {
-      L.DomUtil.addClass(this._path._path, 'leaflet-path-draggable');
+      L.DomUtil.addClass(this._path._path, L.Handler.PathDrag.DRAGGING_CLS);
     }
   },
 
@@ -60,8 +70,11 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
    */
   removeHooks: function() {
     this._path.off('mousedown', this._onDragStart, this);
+
+    this._path.options.className = this._path.options.className
+      .replace(new RegExp('\\s+' + L.Handler.PathDrag.DRAGGING_CLS), '');
     if (this._path._path) {
-      L.DomUtil.removeClass(this._path._path, 'leaflet-path-draggable');
+      L.DomUtil.removeClass(this._path._path, L.Handler.PathDrag.DRAGGING_CLS);
     }
   },
 
@@ -229,6 +242,9 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
 
 L.Path.addInitHook(function() {
   if (this.options.draggable) {
+    // ensure interactive
+    this.options.interactive = true;
+
     if (this.dragging) {
       this.dragging.enable();
     } else {
