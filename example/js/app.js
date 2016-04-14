@@ -132,7 +132,7 @@ var polygonWithHole = global.polygonWithHole = new L.Polygon(
   .addTo(map)
   .bindPopup("I'm a polygon with hole");
 
-var circle = new L.Circle([22.360897240132373, 114.14520263671875], 4000, {
+var circle = global.circle = new L.Circle([22.360897240132373, 114.14520263671875], 4000, {
     draggable: true
   })
   .bindPopup("L.Circle")

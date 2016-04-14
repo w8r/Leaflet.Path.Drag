@@ -1,8 +1,13 @@
 /**
- * Matrix transform path for SVG/VML
+ * Leaflet vector features drag functionality
+ * @author Alexander Milevski <info@w8r.name>
+ * @preserve
  */
 
-// Renderer-independent
+/**
+ * Matrix transform path for SVG/VML
+ * Renderer-independent
+ */
 L.Path.include({
 
 	/**

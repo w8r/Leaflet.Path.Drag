@@ -13,7 +13,7 @@ L.SVG.include({
 	 * @param {Array.<Number>} matrix
 	 */
 	transformPath: function(layer, matrix) {
-		layer._path.setAttributeNS(null, "transform",
+		layer._path.setAttributeNS(null, 'transform',
 			'matrix(' + matrix.join(' ') + ')');
 	}
 

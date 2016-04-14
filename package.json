@@ -6,10 +6,11 @@
   "scripts": {
     "test": "echo \"No tests yet\" && exit 1",
     "start": "npm run watch & serve -p 3001",
+    "lint": "eslint ./src/",
     "watch": "watchify -v -d example/js/app.js -o example/js/bundle.js",
     "build-js": "cat ./src/Path.Transform.js ./src/Path.Drag.js ./src/SVG.js ./src/SVG.VML.js ./src/Canvas.js > ./dist/L.Path.Drag-src.js",
-    "compress": "uglifyjs ./dist/L.Path.Drag-src.js -o ./dist/L.Path.Drag.js -m",
-    "build": "npm run build-js && npm run compress",
+    "compress": "uglifyjs ./dist/L.Path.Drag-src.js -o ./dist/L.Path.Drag.js -m --comments",
+    "build": "npm run lint && npm run build-js && npm run compress",
     "release": "git push origin master && git checkout gh-pages && git merge master && git push origin gh-pages && git checkout master && npm publish"
   },
   "keywords": [
@@ -33,6 +34,7 @@
   },
   "devDependencies": {
     "browserify": "^8.1.1",
+    "eslint": "^2.7.0",
     "serve": "^1.4.0",
     "uglifyjs": "^2.3.6",
     "watchify": "^2.2.1"
