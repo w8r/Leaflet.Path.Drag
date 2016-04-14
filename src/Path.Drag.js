@@ -165,6 +165,7 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
       .off(document, 'mousemove touchmove', this._onDrag, this)
       .off(document, 'mouseup touchend',    this._onDragEnd, this);
 
+    this._restoreCoordGetters();
     // consistency
     this._path.fire('dragend', {
       distance: Math.sqrt(
@@ -179,7 +180,6 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     if (this._mapDraggingWasEnabled) {
       this._path._map.dragging.enable();
     }
-    this._restoreCoordGetters();
   },
 
 

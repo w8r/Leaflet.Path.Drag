@@ -125,8 +125,8 @@ var polygonWithHole = global.polygonWithHole = new L.Polygon(
         [114.30107116699219, 22.43387890178297]
       ])
     ], {
-      draggable: true,
-      renderer: renderer
+      draggable: true//,
+      //renderer: renderer
     }
   )
   .addTo(map)
