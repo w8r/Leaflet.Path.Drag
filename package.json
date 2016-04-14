@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"No tests yet\" && exit 1",
-    "start": "npm run watch & serve -p 3001",
+    "start": "npm run watch & serve -p 3002",
     "lint": "eslint ./src/",
     "watch": "watchify -v -d example/js/app.js -o example/js/bundle.js",
     "build-js": "cat ./src/Path.Transform.js ./src/Path.Drag.js ./src/SVG.js ./src/SVG.VML.js ./src/Canvas.js > ./dist/L.Path.Drag-src.js",

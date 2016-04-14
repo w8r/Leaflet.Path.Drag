@@ -151,6 +151,9 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
    * @param  {L.MouseEvent} evt
    */
   _onDragEnd: function(evt) {
+    L.DomEvent.stop(evt);
+    L.DomEvent._fakeStop({ type: 'click' });
+
     var containerPoint = this._path._map.mouseEventToContainerPoint(evt);
 
     // apply matrix
