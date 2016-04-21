@@ -98,7 +98,7 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
 
     if (this._path._map.dragging.enabled()) {
       // I guess it's required because mousdown gets simulated with a delay
-      this._path._map.dragging._draggable._onUp();
+      this._path._map.dragging._draggable._onUp(evt);
 
       this._path._map.dragging.disable();
       this._mapDraggingWasEnabled = true;
