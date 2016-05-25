@@ -221,9 +221,10 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
       )
     });
 
-    this._matrix         = null;
-    this._startPoint     = null;
-    this._dragStartPoint = null;
+    this._matrix          = null;
+    this._startPoint      = null;
+    this._dragStartPoint  = null;
+    this._path._dragMoved = false;
 
     if (this._mapDraggingWasEnabled) {
       this._path._map.dragging.enable();
