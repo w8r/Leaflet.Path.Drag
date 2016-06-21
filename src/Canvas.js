@@ -24,6 +24,7 @@ L.Canvas.include({
     }
   },
 
+
   /**
    * Algorithm outline:
    *
@@ -35,7 +36,7 @@ L.Canvas.include({
    *    2.4. draw path
    *    2.5. restore
    *
-   * @param  {L.Path} layer
+   * @param  {L.Path}         layer
    * @param  {Array.<Number>} matrix
    */
   transformPath: function(layer, matrix) {

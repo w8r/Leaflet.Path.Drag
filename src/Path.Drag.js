@@ -151,17 +151,18 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
    * @param  {L.MouseEvent} evt
    */
   _onDragEnd: function(evt) {
-    L.DomEvent.stop(evt);
-    L.DomEvent._fakeStop({ type: 'click' });
-
     var containerPoint = this._path._map.mouseEventToContainerPoint(evt);
+    var moved = this.moved();
 
     // apply matrix
-    if (this.moved()) {
+    if (moved) {
       this._transformPoints(this._matrix);
       this._path._updatePath();
       this._path._project();
       this._path._transform(null);
+
+      L.DomEvent.stop(evt);
+      L.DomEvent._fakeStop({ type: 'click' });
     }
 
     L.DomEvent
@@ -169,12 +170,22 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
       .off(document, 'mouseup touchend',    this._onDragEnd, this);
 
     this._restoreCoordGetters();
+
     // consistency
-    this._path.fire('dragend', {
-      distance: Math.sqrt(
-        L.LineUtil._sqDist(this._dragStartPoint, containerPoint)
-      )
-    });
+    if (moved) {
+      this._path.fire('dragend', {
+        distance: Math.sqrt(
+          L.LineUtil._sqDist(this._dragStartPoint, containerPoint)
+        )
+      });
+
+      // hack for skipping the click in canvas-rendered layers
+      var contains = this._path._containsPoint;
+      this._path._containsPoint = L.Util.falseFn;
+      L.Util.requestAnimFrame(function() {
+        this._path._containsPoint = contains;
+      }, this);
+    }
 
     this._matrix          = null;
     this._startPoint      = null;

@@ -1,7 +1,7 @@
-var L = global.L;
+var L = require('leaflet');
 // L.Browser.retina = true;
 var DragHandler = require('../../index');
-L.Icon.Default.imagePath = "leaflet-master/images";
+L.Icon.Default.imagePath = "//cdn.leafletjs.com/leaflet-1.0.0-b1/images";
 
 ////////////////////////////////////////////////////////////////////////////////
 var map = global.map = new L.Map('map', {
@@ -124,6 +124,7 @@ var polygonWithHole = global.polygonWithHole = new L.Polygon(
         [114.30107116699219, 22.43387890178297]
       ])
     ], {
+      interactive: true,
       draggable: true//,
       //renderer: renderer
     }
@@ -137,7 +138,7 @@ var circle = global.circle = new L.Circle([22.360897240132373, 114.1452026367187
   .bindPopup("L.Circle")
   .addTo(map)
 
-var circleMarker = new L.CircleMarker(map.getCenter(), {
+var circleMarker = global.circleMarker = new L.CircleMarker(map.getCenter(), {
     draggable: true,
     renderer: renderer
   })
