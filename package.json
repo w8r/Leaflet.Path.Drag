@@ -1,6 +1,6 @@
 {
   "name": "leaflet-path-drag",
-  "version": "1.0.0-beta.9",
+  "version": "1.0.0-beta.10",
   "description": "Drag functionality for Leaflet vector layers",
   "main": "index.js",
   "scripts": {
@@ -29,14 +29,11 @@
   "bugs": {
     "url": "https://github.com/w8r/Leaflet.Path.Drag/issues"
   },
-  "dependencies": {
-
-  },
+  "dependencies": {},
   "devDependencies": {
     "browserify": "^8.1.1",
-    "leaflet": "^1.0.0-beta.2",
-    "eslint": "^2.7.0",
     "leaflet": "^1.0.0-rc.1",
+    "eslint": "^2.7.0",
     "serve": "^1.4.0",
     "uglifyjs": "^2.3.6",
     "watchify": "^2.2.1",
