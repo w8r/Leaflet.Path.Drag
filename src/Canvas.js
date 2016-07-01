@@ -20,7 +20,6 @@ L.Canvas.include({
       delete layer._containsPoint_;
 
       this._requestRedraw(layer);
-      this._draw(true);
     }
   },
 

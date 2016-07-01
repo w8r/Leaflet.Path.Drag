@@ -138,12 +138,12 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
 
     L.DomUtil.addClass(this._path._renderer._container, 'leaflet-interactive');
     L.DomEvent
-      .on(document, L.Draggable.MOVE[eventType], this._onDrag, this)
-      .on(document, L.Draggable.END[eventType], this._onDragEnd, this);
+      .on(document, L.Draggable.MOVE[eventType], this._onDrag,    this)
+      .on(document, L.Draggable.END[eventType],  this._onDragEnd, this);
 
     if (this._path._map.dragging.enabled()) {
       // I guess it's required because mousdown gets simulated with a delay
-      this._path._map.dragging._draggable._onUp(evt);
+      //this._path._map.dragging._draggable._onUp(evt);
 
       this._path._map.dragging.disable();
       this._mapDraggingWasEnabled = true;
@@ -207,8 +207,8 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
       this._path._transform(null);
 
       L.DomEvent.stop(evt);
-      L.DomEvent._fakeStop({ type: 'click' });
     }
+
 
     L.DomEvent
       .off(document, 'mousemove touchmove', this._onDrag, this)
@@ -228,6 +228,7 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
       var contains = this._path._containsPoint;
       this._path._containsPoint = L.Util.falseFn;
       L.Util.requestAnimFrame(function() {
+        L.DomEvent._skipped({ type: 'click' });
         this._path._containsPoint = contains;
       }, this);
     }
@@ -238,6 +239,7 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     this._path._dragMoved = false;
 
     if (this._mapDraggingWasEnabled) {
+      L.DomEvent._fakeStop({ type: 'click' });
       this._path._map.dragging.enable();
     }
   },
@@ -473,7 +475,6 @@ L.Canvas.include({
       delete layer._containsPoint_;
 
       this._requestRedraw(layer);
-      this._draw(true);
     }
   },
 
