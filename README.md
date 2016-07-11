@@ -5,7 +5,7 @@
 Drag handler for [Leaflet](https://github.com/leaflet/leaflet) vector features.
 It adds dragging API and events of `L.Marker` to `L.Polygon` and `L.Polyline`.
 
-If you are looking for this functionality combined with [Leaflet.draw](https://github.com/leaflet/Leaflet.draw), take a look at [Leaflet.draw.drag](http://github.com/w8r/Leaflet.draw.drag).
+If you are looking for this functionality combined with [Leaflet.draw](https://github.com/leaflet/Leaflet.draw), take a look at [Leaflet.draw.drag](http://github.com/w8r/Leaflet.draw.drag) and [Leaflet.Editable.Drag](https://github.com/w8r/Leaflet.Editable.Drag).
 
 ## [Demo](https://w8r.github.io/Leaflet.Path.Drag)
 
