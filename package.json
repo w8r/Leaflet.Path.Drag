@@ -34,7 +34,7 @@
   "devDependencies": {
     "babel-preset-es2015": "^6.14.0",
     "babelify": "^7.3.0",
-    "browserify": "^8.1.1",
+    "browserify": "^13.1.0",
     "prosthetic-hand": "^1.3.1",
     "serve": "^1.4.0",
     "smokestack": "^3.4.1",
@@ -42,6 +42,6 @@
     "tap-status": "^1.0.1",
     "tape": "^4.6.0",
     "uglifyjs": "^2.3.6",
-    "watchify": "^2.2.1"
+    "watchify": "^3.7.0"
   }
 }
