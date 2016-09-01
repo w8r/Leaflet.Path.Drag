@@ -54,7 +54,11 @@ var polygon = global.polygon = new L.Polygon(
   ), {
     color: '#f00',
     draggable: true
-  }).addTo(map);
+  })
+  .on('click', function (evt) {
+    console.log('click');
+  })
+  .addTo(map);
 
 var polyline = global.polyline = new L.Polyline(
   L.GeoJSON.coordsToLatLngs([
