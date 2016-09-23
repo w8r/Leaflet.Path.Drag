@@ -10,10 +10,7 @@
     "block-scoped-var": 2,
     "camelcase": 1,
     "comma-style": 2,
-    "curly": [
-      2,
-      "all"
-    ],
+    "curly": 0,
     "dot-notation": 0,
     "eqeqeq": [
       2,

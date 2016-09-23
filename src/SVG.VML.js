@@ -40,10 +40,10 @@ L.SVG.include(!L.Browser.vml ? {} : {
 		var w = parseFloat(s.width);
 		var h = parseFloat(s.height);
 
-		if (isNaN(l)) { l = 0; }
-		if (isNaN(t)) { t = 0; }
-		if (isNaN(w) || !w) { w = 1; }
-		if (isNaN(h) || !h) { h = 1; }
+		if (isNaN(l))       l = 0;
+		if (isNaN(t))       t = 0;
+		if (isNaN(w) || !w) w = 1;
+		if (isNaN(h) || !h) h = 1;
 
 		var origin = (-l / w - 0.5).toFixed(8) + ' ' + (-t / h - 0.5).toFixed(8);
 

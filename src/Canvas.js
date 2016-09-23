@@ -9,9 +9,7 @@ L.Canvas.include({
    * @param  {L.Path} layer
    */
   _resetTransformPath: function(layer) {
-    if (!this._containerCopy) {
-      return;
-    }
+    if (!this._containerCopy) return;
 
     delete this._containerCopy;
 

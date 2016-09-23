@@ -6,8 +6,10 @@ import DragHandler from '../';
 let stylesheet  = document.createElement('link');
 stylesheet.rel  = 'stylesheet';
 stylesheet.type = 'text/css';
-stylesheet.href = '//cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.0-rc.1/leaflet.css';
+stylesheet.href = '//cdnjs.cloudflare.com/ajax/libs/leaflet/1.0.0-rc.3/leaflet.css';
 document.head.appendChild(stylesheet);
+
+const center = [22.42658, 114.1952];
 
 const createMap = () => {
   let div = document.createElement('div');
@@ -16,7 +18,7 @@ const createMap = () => {
   document.body.appendChild(div);
 
   const map = new L.Map(div, {})
-    .setView([22.42658, 114.1952], 11);
+    .setView(center, 11);
   map._container.style.background = 'url(\'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAMAAAC7IEhfAAAABlBMVEXMzMz////TjRV2AAAASklEQVR42u3SsREAMAjDwGf/pbMAhdJDrQvBlm1mmeOOO+6PU99T96r/U+9Q71VzUfNTc1b7UHtT+1U9UH1RvVL9Uz1VfVa9F7l5CX4DIbeXYmYAAAAASUVORK5CYII=\')';
   return map;
 }
@@ -54,112 +56,122 @@ tape('L.Path.Drag', (t) => {
     const map = createMap();
 
     t.test('circle', (t) => {
-      map.on('click', (evt) => {
-        t.fail()
-      });
+      t.plan(6);
+      const failIfClickPropagates = (evt) => t.fail();
+      map
+        .once('click', failIfClickPropagates);
 
-      const path = L.circle([22.42658, 114.1952], {
-        radius: 2000,
+      const path = L.circle(center, {
+        radius: 4000,
         draggable: true,
         interactive: true
       }).on('dragend', (evt) => {
-        const ll = L.latLng([22.42658, 114.1952]);
+        const ll = L.latLng(center);
         t.notOk(path.getLatLng().equals(ll), 'center changed');
         t.ok(evt.distance < 105 && evt.distance > 95, 'distance');
       }).addTo(map);
 
       const h = new Hand({
         onStop: () => {
+          let c = map.getCenter();
           map.removeLayer(path);
+          map.off('click', failIfClickPropagates);
+          t.deepEquals(center, [c.lat, c.lng], 'map center didnt change');
           t.skip('done');
         }
       });
       const mouse = h.growFinger('mouse');
 
-      t.plan(5);
-
       mouse.moveTo(250, 250, 0)
+        .wait(500)
         .down().moveBy(100, 0, 1000).up().wait(500)
         .down().moveBy(-100, 0, 1000).up().wait(500)
-        .down().wait(100).up().wait(500)
         .down().wait(100).up().wait(500);
     });
 
 
     t.test('polygon', (t) => {
-      map.on('click', (evt) => {
-        t.fail()
-      });
+      t.plan(6);
+
+      const failIfClickPropagates = (evt) => t.fail();
+      map.once('click', failIfClickPropagates);
 
       const shift = 0.05;
+      const y = center[0];
+      const x = center[1];
       const path = L.polygon([
-        [22.42658 - shift, 114.1952 - shift],
-        [22.42658 - shift, 114.1952 + shift],
-        [22.42658 + shift, 114.1952 + shift],
-        [22.42658 + shift, 114.1952 - shift],
-        [22.42658 - shift, 114.1952 - shift]
+        [y - shift, x - shift],
+        [y - shift, x + shift],
+        [y + shift, x + shift],
+        [y + shift, x - shift],
+        [y - shift, x - shift]
       ], {
         draggable: true,
         interactive: true
       }).on('dragend', (evt) => {
-        const ll = L.latLng([22.42658, 114.1952]);
+        const ll = L.latLng(center);
         t.notOk(path.getCenter().equals(ll), 'center changed');
         t.ok(evt.distance < 105 && evt.distance > 95, 'distance');
       }).addTo(map);
 
       const h = new Hand({
         onStop: () => {
+          let c = map.getCenter();
           map.removeLayer(path);
+          map.off('click', failIfClickPropagates);
+          t.deepEquals(center, [c.lat, c.lng], 'map center didnt change');
           t.skip('done');
         }
       });
       const mouse = h.growFinger('mouse');
 
-      t.plan(5);
-
       mouse.moveTo(250, 250, 0)
+        .wait(300)
         .down().moveBy(100, 0, 1000).up().wait(500)
         .down().moveBy(-100, 0, 1000).up().wait(500)
-        .down().wait(100).up().wait(500)
         .down().wait(100).up().wait(500);
     });
 
 
     t.test('polyline', (t) => {
-      map.on('click', (evt) => {
-        t.fail()
-      });
+      t.plan(6);
+
+      const failIfClickPropagates = (evt) => t.fail();
+      map.once('click', failIfClickPropagates);
 
       const shift = 0.05;
+      const y = center[0];
+      const x = center[1];
       const path = L.polyline([
-        [22.42658 + shift, 114.1952 - shift],
-        [22.42658 - shift, 114.1952 - shift],
-        [22.42658 + shift, 114.1952 + shift],
-        [22.42658 - shift, 114.1952 + shift]
+        [y + shift, x - shift],
+        [y - shift, x - shift],
+        [y + shift, x + shift],
+        [y - shift, x + shift]
       ], {
         draggable: true,
         weight: 40,
         interactive: true
       }).on('dragend', (evt) => {
-        const ll = L.latLng([22.42658, 114.1952]);
+        const ll = L.latLng(center);
         t.notOk(path.getCenter().equals(ll), 'center changed');
         t.ok(evt.distance < 105 && evt.distance > 95, 'distance');
       }).addTo(map);
 
       const h = new Hand({
         onStop: () => {
+          let c = map.getCenter();
           map.removeLayer(path);
+          map.off('click', failIfClickPropagates);
+          t.deepEquals(center, [c.lat, c.lng], 'map center didnt change');
           t.skip('done');
         }
       });
       const mouse = h.growFinger('mouse');
 
-      t.plan(5);
-
       mouse.moveTo(250, 250, 0)
+        .wait(300)
         .down().moveBy(100, 0, 1000).up().wait(500)
         .down().moveBy(-100, 0, 1000).up().wait(500)
-        .down().wait(100).up().wait(500)
         .down().wait(100).up().wait(500);
     });
 
