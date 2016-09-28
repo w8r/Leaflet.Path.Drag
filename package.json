@@ -1,6 +1,6 @@
 {
   "name": "leaflet-path-drag",
-  "version": "1.0.0-beta.11",
+  "version": "1.0.0",
   "description": "Drag functionality for Leaflet vector layers",
   "main": "index.js",
   "scripts": {
@@ -40,14 +40,10 @@
     "smokestack": "^3.4.1",
     "tap-closer": "^1.0.0",
     "tap-status": "^1.0.1",
-    "tape": "^4.6.0",
+    "tape": "^4.4.0",
     "uglifyjs": "^2.3.6",
     "watchify": "^3.7.0",
     "faucet": "0.0.1",
-    "smokestack": "^3.4.1",
-    "tap-closer": "^1.0.0",
-    "tap-status": "^1.0.1",
-    "tape": "^4.4.0",
     "babel-preset-es2015": "^6.3.13",
     "babelify": "^7.2.0",
     "prosthetic-hand": "^1.3.1"
