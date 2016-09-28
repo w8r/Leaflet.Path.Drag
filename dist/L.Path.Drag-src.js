@@ -88,14 +88,10 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
 
   },
 
-
   /**
    * Enable dragging
    */
   addHooks: function() {
-    var className = L.Handler.PathDrag.DRAGGABLE_CLS;
-    var path      = this._path._path;
-
     this._path.on('mousedown', this._onDragStart, this);
 
     this._path.options.className = this._path.options.className ?
@@ -107,14 +103,10 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     }
   },
 
-
   /**
    * Disable dragging
    */
   removeHooks: function() {
-    var className = L.Handler.PathDrag.DRAGGABLE_CLS;
-    var path      = this._path._path;
-
     this._path.off('mousedown', this._onDragStart, this);
 
     this._path.options.className = this._path.options.className
@@ -124,24 +116,12 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     }
   },
 
-
   /**
    * @return {Boolean}
    */
   moved: function() {
-    return this._dragMoved;
+    return this._path._dragMoved;
   },
-
-
-  /**
-   * If dragging currently in progress.
-   *
-   * @return {Boolean}
-   */
-  inProgress: function() {
-    return this._dragInProgress;
-  },
-
 
   /**
    * Start drag
@@ -177,7 +157,6 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     this._replaceCoordGetters(evt);
   },
 
-
   /**
    * Dragging
    * @param  {L.MouseEvent} evt
@@ -191,16 +170,8 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     var x = containerPoint.x;
     var y = containerPoint.y;
 
-    var matrix     = this._matrix;
-    var path       = this._path;
-    var startPoint = this._startPoint;
-
-    var dx = x - startPoint.x;
-    var dy = y - startPoint.y;
-
-    if (!this._dragMoved && (dx || dy)) {
-      this._dragMoved = true;
-      path.fire('dragstart');
+    var dx = x - this._startPoint.x;
+    var dy = y - this._startPoint.y;
 
     if (!this._path._dragMoved && (dx || dy)) {
       this._path._dragMoved = true;
@@ -209,19 +180,16 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
       this._path.bringToFront();
     }
 
-    matrix[4] += dx;
-    matrix[5] += dy;
+    this._matrix[4] += dx;
+    this._matrix[5] += dy;
 
-    startPoint.x = x;
-    startPoint.y = y;
-
-    path._applyTransform(matrix);
+    this._startPoint.x = x;
+    this._startPoint.y = y;
 
     this._path.fire('predrag', evt);
     this._path._transform(this._matrix);
     this._path.fire('drag', evt);
   },
-
 
   /**
    * Dragging stopped, apply
@@ -245,8 +213,6 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     L.DomEvent
       .off(document, 'mousemove touchmove', this._onDrag, this)
       .off(document, 'mouseup touchend',    this._onDragEnd, this);
-
-    this._restoreCoordGetters();
 
     this._restoreCoordGetters();
 
