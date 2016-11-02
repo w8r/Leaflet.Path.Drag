@@ -156,7 +156,8 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     if (!this._dragMoved && (dx || dy)) {
       this._dragMoved = true;
       path.fire('dragstart');
-
+    }
+    
     if (!this._path._dragMoved && (dx || dy)) {
       this._path._dragMoved = true;
       this._path.fire('dragstart', evt);
