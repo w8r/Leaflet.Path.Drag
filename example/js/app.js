@@ -1,7 +1,6 @@
 var L = require('leaflet');
 // L.Browser.retina = true;
 var DragHandler = require('../../index');
-L.Icon.Default.imagePath = "//cdn.leafletjs.com/leaflet-1.0.0-b1/images";
 
 ////////////////////////////////////////////////////////////////////////////////
 var map = global.map = new L.Map('map', {

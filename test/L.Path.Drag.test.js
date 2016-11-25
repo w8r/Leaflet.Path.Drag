@@ -55,7 +55,7 @@ tape('L.Path.Drag', (t) => {
   t.test('dragging', (t) => {
     const map = createMap();
 
-    t.test('circle', (t) => {
+    t.test(' - circle', (t) => {
       t.plan(6);
       const failIfClickPropagates = (evt) => t.fail();
       map
@@ -90,7 +90,7 @@ tape('L.Path.Drag', (t) => {
     });
 
 
-    t.test('polygon', (t) => {
+    t.test(' - polygon', (t) => {
       t.plan(6);
 
       const failIfClickPropagates = (evt) => t.fail();
@@ -133,7 +133,7 @@ tape('L.Path.Drag', (t) => {
     });
 
 
-    t.test('polyline', (t) => {
+    t.test(' - polyline', (t) => {
       t.plan(6);
 
       const failIfClickPropagates = (evt) => t.fail();
