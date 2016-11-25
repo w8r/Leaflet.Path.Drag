@@ -173,22 +173,25 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     var dx = x - this._startPoint.x;
     var dy = y - this._startPoint.y;
 
-    if (!this._path._dragMoved && (dx || dy)) {
-      this._path._dragMoved = true;
-      this._path.fire('dragstart', evt);
-      // we don't want that to happen on click
-      this._path.bringToFront();
+    // Send events only if point was moved
+    if (dx || dy) {
+      if (!this._path._dragMoved) {
+        this._path._dragMoved = true;
+        this._path.fire('dragstart', evt);
+        // we don't want that to happen on click
+        this._path.bringToFront();
+      }
+
+      this._matrix[4] += dx;
+      this._matrix[5] += dy;
+
+      this._startPoint.x = x;
+      this._startPoint.y = y;
+
+      this._path.fire('predrag', evt);
+      this._path._transform(this._matrix);
+      this._path.fire('drag', evt);
     }
-
-    this._matrix[4] += dx;
-    this._matrix[5] += dy;
-
-    this._startPoint.x = x;
-    this._startPoint.y = y;
-
-    this._path.fire('predrag', evt);
-    this._path._transform(this._matrix);
-    this._path.fire('drag', evt);
   },
 
   /**
