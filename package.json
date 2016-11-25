@@ -1,6 +1,6 @@
 {
   "name": "leaflet-path-drag",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Drag functionality for Leaflet vector layers",
   "main": "index.js",
   "scripts": {
