@@ -498,13 +498,14 @@ L.Canvas.include({
    *    2.3. transform
    *    2.4. draw path
    *    2.5. restore
+   * 3. Repeat
    *
    * @param  {L.Path}         layer
    * @param  {Array.<Number>} matrix
    */
   transformPath: function(layer, matrix) {
     var copy   = this._containerCopy;
-    var ctx    = this._ctx;
+    var ctx    = this._ctx, copyCtx;
     var m      = L.Browser.retina ? 2 : 1;
     var bounds = this._bounds;
     var size   = bounds.getSize();
@@ -512,17 +513,20 @@ L.Canvas.include({
 
     if (!copy) { // get copy of all rendered layers
       copy = this._containerCopy = document.createElement('canvas');
-      //document.body.appendChild(copy);
+      copyCtx = copy.getContext('2d');
+      // document.body.appendChild(copy);
 
       copy.width  = m * size.x;
       copy.height = m * size.y;
 
-      layer._removed = true;
+      this._removePath(layer);
       this._redraw();
 
-      copy.getContext('2d').translate(m * bounds.min.x, m * bounds.min.y);
-      copy.getContext('2d').drawImage(this._container, 0, 0);
+      copyCtx.translate(m * bounds.min.x, m * bounds.min.y);
+      copyCtx.drawImage(this._container, 0, 0);
       this._initPath(layer);
+
+      // avoid flickering because of the 'mouseover's
       layer._containsPoint_ = layer._containsPoint;
       layer._containsPoint = L.Util.trueFn;
     }
@@ -536,13 +540,11 @@ L.Canvas.include({
     ctx.drawImage(this._containerCopy, 0, 0, size.x, size.y);
     ctx.transform.apply(ctx, matrix);
 
-    var layers = this._layers;
-    this._layers = {};
-
-    this._initPath(layer);
+    // now draw one layer only
+    this._drawing = true;
     layer._updatePath();
+    this._drawing = false;
 
-    this._layers = layers;
     ctx.restore();
   }
 
