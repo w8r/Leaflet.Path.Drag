@@ -119,16 +119,16 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
   _onDrag: function(evt) {
     L.DomEvent.stop(evt);
 
-    // skip taps
-    // if (evt.type === 'touchmove' && !this._path._dragMoved) {
-    //   var totalMouseDragDistance = this._dragStartPoint.distanceTo(containerPoint);
-    //   if (totalMouseDragDistance <= this._path._map.options.tapTolerance) {
-    //     return;
-    //   }
-    // }
-
     var first = (evt.touches && evt.touches.length >= 1 ? evt.touches[0] : evt);
     var containerPoint = this._path._map.mouseEventToContainerPoint(first);
+
+    // skip taps
+    if (evt.type === 'touchmove' && !this._path._dragMoved) {
+      var totalMouseDragDistance = this._dragStartPoint.distanceTo(containerPoint);
+      if (totalMouseDragDistance <= this._path._map.options.tapTolerance) {
+        return;
+      }
+    }
 
     var x = containerPoint.x;
     var y = containerPoint.y;

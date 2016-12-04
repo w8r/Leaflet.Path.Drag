@@ -167,6 +167,14 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     var first = (evt.touches && evt.touches.length >= 1 ? evt.touches[0] : evt);
     var containerPoint = this._path._map.mouseEventToContainerPoint(first);
 
+    // skip taps
+    if (evt.type === 'touchmove' && !this._path._dragMoved) {
+      var totalMouseDragDistance = this._dragStartPoint.distanceTo(containerPoint);
+      if (totalMouseDragDistance <= this._path._map.options.tapTolerance) {
+        return;
+      }
+    }
+
     var x = containerPoint.x;
     var y = containerPoint.y;
 
@@ -495,18 +503,18 @@ L.Canvas.include({
    * @param  {Array.<Number>} matrix
    */
   transformPath: function(layer, matrix) {
-    var copy = this._containerCopy;
-    var ctx = this._ctx;
-    var m = L.Browser.retina ? 2 : 1;
+    var copy   = this._containerCopy;
+    var ctx    = this._ctx;
+    var m      = L.Browser.retina ? 2 : 1;
     var bounds = this._bounds;
-    var size = bounds.getSize();
-    var pos = bounds.min;
+    var size   = bounds.getSize();
+    var pos    = bounds.min;
 
-    if (!copy) {
+    if (!copy) { // get copy of all rendered layers
       copy = this._containerCopy = document.createElement('canvas');
-      document.body.appendChild(copy);
+      //document.body.appendChild(copy);
 
-      copy.width = m * size.x;
+      copy.width  = m * size.x;
       copy.height = m * size.y;
 
       layer._removed = true;
