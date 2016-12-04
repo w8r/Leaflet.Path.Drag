@@ -59,11 +59,7 @@ tape('L.Path.Drag', (t) => {
     t.test(' === SVG === ', (t) => {
 
       t.test(' - circle', (t) => {
-<<<<<<< HEAD
         t.plan(5);
-=======
-        t.plan(6);
->>>>>>> 660be41... fixes canvas for 1.0.2
         const failIfClickPropagates = (evt) => t.fail();
         map
           .once('click', failIfClickPropagates);
@@ -84,10 +80,6 @@ tape('L.Path.Drag', (t) => {
             map.removeLayer(path);
             map.off('click', failIfClickPropagates);
             t.deepEquals(center, [c.lat, c.lng], 'map center didnt change');
-<<<<<<< HEAD
-=======
-            t.skip('done');
->>>>>>> 660be41... fixes canvas for 1.0.2
           }
         });
         const mouse = h.growFinger('mouse');
@@ -95,7 +87,6 @@ tape('L.Path.Drag', (t) => {
         mouse.moveTo(250, 250, 0)
           .wait(500)
           .down().moveBy(100, 0, 1000).up().wait(500)
-<<<<<<< HEAD
           .down().moveBy(0, 100, 1000).up().wait(500)
           .down().wait(100).up().wait(500);
       });
@@ -122,33 +113,6 @@ tape('L.Path.Drag', (t) => {
         }).on('dragend', (evt) => {
           const ll = L.latLng(center);
           t.notOk(path.getCenter().equals(ll), 'center changed');
-=======
-          .down().moveBy(-100, 0, 1000).up().wait(500)
-          .down().wait(100).up().wait(500);
-      });
-
-
-      t.test(' - polygon', (t) => {
-        t.plan(6);
-
-        const failIfClickPropagates = (evt) => t.fail();
-        map.once('click', failIfClickPropagates);
-
-        const shift = 0.05;
-        const y = center[0];
-        const x = center[1];
-        const path = L.polygon([
-          [y - shift, x - shift],
-          [y - shift, x + shift],
-          [y + shift, x + shift],
-          [y + shift, x - shift],
-          [y - shift, x - shift]
-        ], {
-          draggable: true,
-          interactive: true
-        }).on('dragend', (evt) => {
-          const ll = L.latLng(center);
-          t.notOk(path.getCenter().equals(ll), 'center changed');
           t.ok(evt.distance < 105 && evt.distance > 95, 'distance');
         }).addTo(map);
 
@@ -158,7 +122,6 @@ tape('L.Path.Drag', (t) => {
             map.removeLayer(path);
             map.off('click', failIfClickPropagates);
             t.deepEquals(center, [c.lat, c.lng], 'map center didnt change');
-            t.skip('done');
           }
         });
         const mouse = h.growFinger('mouse');
@@ -166,13 +129,13 @@ tape('L.Path.Drag', (t) => {
         mouse.moveTo(250, 250, 0)
           .wait(300)
           .down().moveBy(100, 0, 1000).up().wait(500)
-          .down().moveBy(-100, 0, 1000).up().wait(500)
+          .down().moveBy(0, 100, 1000).up().wait(500)
           .down().wait(100).up().wait(500);
       });
 
 
       t.test(' - polyline', (t) => {
-        t.plan(6);
+        t.plan(5);
 
         const failIfClickPropagates = (evt) => t.fail();
         map.once('click', failIfClickPropagates);
@@ -201,7 +164,6 @@ tape('L.Path.Drag', (t) => {
             map.removeLayer(path);
             map.off('click', failIfClickPropagates);
             t.deepEquals(center, [c.lat, c.lng], 'map center didnt change');
-            t.skip('done');
           }
         });
         const mouse = h.growFinger('mouse');
@@ -209,122 +171,6 @@ tape('L.Path.Drag', (t) => {
         mouse.moveTo(250, 250, 0)
           .wait(300)
           .down().moveBy(100, 0, 1000).up().wait(500)
-          .down().moveBy(-100, 0, 1000).up().wait(500)
-          .down().wait(100).up().wait(500);
-      });
-
-      t.end();
-    });
-
-
-    t.test(' === Canvas === ', (t) => {
-
-      t.test(' - circle', (t) => {
-        t.plan(6);
-        const failIfClickPropagates = (evt) => t.fail();
-        map
-          .once('click', failIfClickPropagates);
-
-        const path = L.circle(center, {
-          radius: 4000,
-          draggable: true,
-          interactive: true,
-          renderer: canvas
-        }).on('dragend', (evt) => {
-          const ll = L.latLng(center);
-          t.notOk(path.getLatLng().equals(ll), 'center changed');
->>>>>>> 660be41... fixes canvas for 1.0.2
-          t.ok(evt.distance < 105 && evt.distance > 95, 'distance');
-        }).addTo(map);
-
-        const h = new Hand({
-          onStop: () => {
-            let c = map.getCenter();
-            map.removeLayer(path);
-            map.off('click', failIfClickPropagates);
-            t.deepEquals(center, [c.lat, c.lng], 'map center didnt change');
-<<<<<<< HEAD
-=======
-            t.skip('done');
->>>>>>> 660be41... fixes canvas for 1.0.2
-          }
-        });
-        const mouse = h.growFinger('mouse');
-
-        mouse.moveTo(250, 250, 0)
-<<<<<<< HEAD
-          .wait(300)
-          .down().moveBy(100, 0, 1000).up().wait(500)
-          .down().moveBy(0, 100, 1000).up().wait(500)
-=======
-          .wait(500)
-          .down().moveBy(100, 0, 1000).up().wait(500)
-          .down().moveBy(-100, 0, 1000).up().wait(500)
->>>>>>> 660be41... fixes canvas for 1.0.2
-          .down().wait(100).up().wait(500);
-      });
-
-
-<<<<<<< HEAD
-      t.test(' - polyline', (t) => {
-        t.plan(5);
-=======
-      t.test(' - polygon', (t) => {
-        t.plan(6);
->>>>>>> 660be41... fixes canvas for 1.0.2
-
-        const failIfClickPropagates = (evt) => t.fail();
-        map.once('click', failIfClickPropagates);
-
-        const shift = 0.05;
-        const y = center[0];
-        const x = center[1];
-<<<<<<< HEAD
-        const path = L.polyline([
-          [y + shift, x - shift],
-          [y - shift, x - shift],
-          [y + shift, x + shift],
-          [y - shift, x + shift]
-        ], {
-          draggable: true,
-          weight: 40,
-          interactive: true
-=======
-        const path = L.polygon([
-          [y - shift, x - shift],
-          [y - shift, x + shift],
-          [y + shift, x + shift],
-          [y + shift, x - shift],
-          [y - shift, x - shift]
-        ], {
-          draggable: true,
-          interactive: true,
-          renderer: canvas
->>>>>>> 660be41... fixes canvas for 1.0.2
-        }).on('dragend', (evt) => {
-          const ll = L.latLng(center);
-          t.notOk(path.getCenter().equals(ll), 'center changed');
-          t.ok(evt.distance < 105 && evt.distance > 95, 'distance');
-        }).addTo(map);
-
-        const h = new Hand({
-          onStop: () => {
-            let c = map.getCenter();
-            map.removeLayer(path);
-            map.off('click', failIfClickPropagates);
-            t.deepEquals(center, [c.lat, c.lng], 'map center didnt change');
-<<<<<<< HEAD
-=======
-            t.skip('done');
->>>>>>> 660be41... fixes canvas for 1.0.2
-          }
-        });
-        const mouse = h.growFinger('mouse');
-
-        mouse.moveTo(250, 250, 0)
-          .wait(300)
-          .down().moveBy(100, 0, 1000).up().wait(500)
-<<<<<<< HEAD
           .down().moveBy(0, 100, 1000).up().wait(500)
           .down().wait(100).up().wait(500);
       });
@@ -342,39 +188,11 @@ tape('L.Path.Drag', (t) => {
         const path = L.circle(center, {
           radius: 4000,
           draggable: true,
-=======
-          .down().moveBy(-100, 0, 1000).up().wait(500)
-          .down().wait(100).up().wait(500);
-      });
-
-
-      t.test(' - polyline', (t) => {
-        t.plan(6);
-
-        const failIfClickPropagates = (evt) => t.fail();
-        map.once('click', failIfClickPropagates);
-
-        const shift = 0.05;
-        const y = center[0];
-        const x = center[1];
-        const path = L.polyline([
-          [y + shift, x - shift],
-          [y - shift, x - shift],
-          [y + shift, x + shift],
-          [y - shift, x + shift]
-        ], {
-          draggable: true,
-          weight: 40,
->>>>>>> 660be41... fixes canvas for 1.0.2
           interactive: true,
           renderer: canvas
         }).on('dragend', (evt) => {
           const ll = L.latLng(center);
-<<<<<<< HEAD
           t.notOk(path.getLatLng().equals(ll), 'center changed');
-=======
-          t.notOk(path.getCenter().equals(ll), 'center changed');
->>>>>>> 660be41... fixes canvas for 1.0.2
           t.ok(evt.distance < 105 && evt.distance > 95, 'distance');
         }).addTo(map);
 
@@ -384,16 +202,11 @@ tape('L.Path.Drag', (t) => {
             map.removeLayer(path);
             map.off('click', failIfClickPropagates);
             t.deepEquals(center, [c.lat, c.lng], 'map center didnt change');
-<<<<<<< HEAD
-=======
-            t.skip('done');
->>>>>>> 660be41... fixes canvas for 1.0.2
           }
         });
         const mouse = h.growFinger('mouse');
 
         mouse.moveTo(250, 250, 0)
-<<<<<<< HEAD
           .wait(500)
           .down().moveBy(100, 0, 1000).up().wait(500)
           .down().moveBy(0, 100, 1000).up().wait(500)
@@ -487,21 +300,4 @@ tape('L.Path.Drag', (t) => {
       });
     });
   });
-=======
-          .wait(300)
-          .down().moveBy(100, 0, 1000).up().wait(500)
-          .down().moveBy(-100, 0, 1000).up().wait(500)
-          .down().wait(100).up().wait(500);
-      });
-
-      t.end();
-    });
-
-    t.end();
-  });
-
-
-
-  t.end();
->>>>>>> 660be41... fixes canvas for 1.0.2
 });
