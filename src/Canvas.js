@@ -13,10 +13,6 @@ L.Canvas.include({
 
     delete this._containerCopy;
 
-    layer._order    = layer._order_;
-    this._drawFirst = this._drawFirst_;
-    this._drawLast  = this._drawLast_;
-
     if (layer._containsPoint_) {
       layer._containsPoint = layer._containsPoint_;
       delete layer._containsPoint_;
@@ -63,12 +59,10 @@ L.Canvas.include({
       copyCtx.translate(m * bounds.min.x, m * bounds.min.y);
       copyCtx.drawImage(this._container, 0, 0);
       this._initPath(layer);
+
+      // avoid flickering because of the 'mouseover's
       layer._containsPoint_ = layer._containsPoint;
       layer._containsPoint = L.Util.trueFn;
-
-      layer._order_ = layer._order;
-      this._drawFirst_ = this._drawFirst;
-      this._drawLast_  = this._drawLast;
     }
 
     ctx.save();
@@ -81,17 +75,9 @@ L.Canvas.include({
     ctx.transform.apply(ctx, matrix);
 
     // now draw one layer only
-    var layers = this._layers;
-    this._layers = {};
-
-    //this._removePath(layer);
-    this._drawLast = this._drawFirst = null;
-
-    this._initPath(layer);
-    this._extendRedrawBounds(layer);
-		this._redraw();
-
-    this._layers = layers;
+    this._drawing = true;
+    layer._updatePath();
+    this._drawing = false;
 
     ctx.restore();
   }
