@@ -1,3 +1,5 @@
+
+
 /**
  * Drag handler
  * @class L.Path.Drag
@@ -9,6 +11,9 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     DRAGGING_CLS: 'leaflet-path-draggable',
   },
 
+  _evDown: L.Browser.pointer ? 'pointerdown' : 'mousedown',
+  _evUp  : L.Browser.pointer ? 'pointerup'   : 'mouseup',
+  _evMove: L.Browser.pointer ? 'pointermove' : 'mousemove',
 
   /**
    * @param  {L.Path} path
@@ -47,7 +52,7 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
    * Enable dragging
    */
   addHooks: function() {
-    this._path.on('mousedown', this._onDragStart, this);
+    this._path.on(this._evDown, this._onDragStart, this);
 
     this._path.options.className = this._path.options.className ?
         (this._path.options.className + ' ' + L.Handler.PathDrag.DRAGGING_CLS) :
@@ -62,7 +67,7 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
    * Disable dragging
    */
   removeHooks: function() {
-    this._path.off('mousedown', this._onDragStart, this);
+    this._path.off(this._evDown, this._onDragStart, this);
 
     this._path.options.className = this._path.options.className
       .replace(new RegExp('\\s+' + L.Handler.PathDrag.DRAGGING_CLS), '');
@@ -93,8 +98,8 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
 
     L.DomUtil.addClass(this._path._renderer._container, 'leaflet-interactive');
     L.DomEvent
-      .on(document, L.Draggable.MOVE[eventType], this._onDrag,    this)
-      .on(document, L.Draggable.END[eventType],  this._onDragEnd, this);
+      .on(document, this._evMove, this._onDrag,    this)
+      .on(document, this._evUp,   this._onDragEnd, this);
 
     if (this._path._map.dragging.enabled()) {
       // I guess it's required because mousdown gets simulated with a delay
@@ -123,7 +128,7 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
     var containerPoint = this._path._map.mouseEventToContainerPoint(first);
 
     // skip taps
-    if (evt.type === 'touchmove' && !this._path._dragMoved) {
+    if ((evt.type === 'touchmove' || evt.pointerType === 'touch') && !this._path._dragMoved) {
       var totalMouseDragDistance = this._dragStartPoint.distanceTo(containerPoint);
       if (totalMouseDragDistance <= this._path._map.options.tapTolerance) {
         return;
@@ -177,8 +182,8 @@ L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
 
 
     L.DomEvent
-      .off(document, 'mousemove touchmove', this._onDrag, this)
-      .off(document, 'mouseup touchend',    this._onDragEnd, this);
+      .off(document, this._evMove, this._onDrag, this)
+      .off(document, this._evUp,   this._onDragEnd, this);
 
     this._restoreCoordGetters();
 
