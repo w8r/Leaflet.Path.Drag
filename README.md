@@ -33,7 +33,9 @@ require('leaflet');
 var handler = require('leaflet-path-drag');
 ```
 
-For Leaflet@1.x support use code from `leaflet-1.0` branch, there's also support for Canvas renderer, but it's buggy on touch devices
+Requires Leaflet@1.1.x
+
+For Leaflet@0.7.x support use code from `leaflet-0.7` branch
 
 ## Info
 
