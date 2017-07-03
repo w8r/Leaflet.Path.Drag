@@ -60,6 +60,17 @@ var polygon = global.polygon = new L.Polygon(
   .addTo(map)
   .bindPopup('L.Polygon');
 
+var rectangle = global.rectangle = new L.Rectangle(L.latLngBounds([
+  [22.334833457530486, 114.004266357422],
+  [22.244615500323064, 114.09008276367189]
+]), {
+    weight: 2,
+    draggable: true,
+    transform: true
+  })
+  .bindPopup("L.Rectangle")
+  .addTo(map);
+
 var polyline = global.polyline = new L.Polyline(
     L.GeoJSON.coordsToLatLngs([
       [114.14314270019531, 22.49479484975443],
