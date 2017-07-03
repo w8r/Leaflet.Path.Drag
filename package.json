@@ -30,7 +30,7 @@
     "url": "https://github.com/w8r/Leaflet.Path.Drag/issues"
   },
   "dependencies": {
-    "leaflet": "^1.0.2"
+    "leaflet": "~1.0.2"
   },
   "devDependencies": {
     "prosthetic-hand": "^1.3.1",
