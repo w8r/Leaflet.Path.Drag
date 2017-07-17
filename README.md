@@ -37,6 +37,13 @@ Requires Leaflet@1.1.x
 
 For Leaflet@0.7.x support use code from `leaflet-0.7` branch
 
+**Enable/disable dragging**
+```
+var polygon = new L.Polygon([...], { draggable: true }).addTo(map);
+polygon.dragging.enable();
+polygon.dragging.disable();
+```
+
 ## Info
 
 It uses matrix transforms on SVG/VML paths, so part of it(`src/L.Path.Transform`) could be used for different transformations - skew/scale/etc - but you have to provide coordinates projection and handling yourself.
