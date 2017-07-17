@@ -38,7 +38,7 @@ Requires Leaflet@1.1.x
 For Leaflet@0.7.x support use code from `leaflet-0.7` branch
 
 **Enable/disable dragging**
-```
+```js
 var polygon = new L.Polygon([...], { draggable: true }).addTo(map);
 polygon.dragging.enable();
 polygon.dragging.disable();
