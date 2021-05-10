@@ -1,6 +1,6 @@
 # L.Path.Drag
 
-[![npm version](https://badge.fury.io/js/leaflet-path-drag.svg)](http://badge.fury.io/js/leaflet-path-drag) [![CircleCI](https://circleci.com/gh/w8r/Leaflet.Path.Drag/tree/master.svg?style=shield)](https://circleci.com/gh/w8r/Leaflet.Path.Drag/tree/master)
+[![npm version](https://badge.fury.io/js/leaflet-path-drag.svg)](http://badge.fury.io/js/leaflet-path-drag)
 
 Drag handler for [Leaflet](https://github.com/leaflet/leaflet) vector features.
 It adds dragging API and events of `L.Marker` to `L.Polygon` and `L.Polyline`.
