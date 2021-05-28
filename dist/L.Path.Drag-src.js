@@ -43,22 +43,24 @@ L.Path.include({
 	}
 
 });
+/* eslint-disable quotes */
 var END = {
-  mousedown:     'mouseup',
-  touchstart:    'touchend',
-  pointerdown:   'touchend',
-  MSPointerDown: 'touchend'
+  mousedown: "mouseup",
+  touchstart: "touchend",
+  pointerdown: "touchend",
+  MSPointerDown: "touchend",
 };
 
 var MOVE = {
-  mousedown:     'mousemove',
-  touchstart:    'touchmove',
-  pointerdown:   'touchmove',
-  MSPointerDown: 'touchmove'
+  mousedown: "mousemove",
+  touchstart: "touchmove",
+  pointerdown: "touchmove",
+  MSPointerDown: "touchmove",
 };
 
 function distance(a, b) {
-  var dx = a.x - b.x, dy = a.y - b.y;
+  var dx = a.x - b.x,
+    dy = a.y - b.y;
   return Math.sqrt(dx * dx + dy * dy);
 }
 
@@ -67,328 +69,344 @@ function distance(a, b) {
  * @class L.Path.Drag
  * @extends {L.Handler}
  */
-L.Handler.PathDrag = L.Handler.extend( /** @lends  L.Path.Drag.prototype */ {
-
-  statics: {
-    DRAGGING_CLS: 'leaflet-path-draggable',
-  },
-
-
-  /**
-   * @param  {L.Path} path
-   * @constructor
-   */
-  initialize: function(path) {
+L.Handler.PathDrag = L.Handler.extend(
+  /** @lends  L.Path.Drag.prototype */ {
+    statics: {
+      DRAGGING_CLS: "leaflet-path-draggable",
+    },
 
     /**
-     * @type {L.Path}
+     * @param  {L.Path} path
+     * @constructor
      */
-    this._path = path;
+    initialize: function (path) {
+      /**
+       * @type {L.Path}
+       */
+      this._path = path;
+
+      /**
+       * @type {Array.<Number>}
+       */
+      this._matrix = null;
+
+      /**
+       * @type {L.Point}
+       */
+      this._startPoint = null;
+
+      /**
+       * @type {L.Point}
+       */
+      this._dragStartPoint = null;
+
+      /**
+       * @type {Boolean}
+       */
+      this._mapDraggingWasEnabled = false;
+    },
 
     /**
-     * @type {Array.<Number>}
+     * Enable dragging
      */
-    this._matrix = null;
+    addHooks: function () {
+      this._path.on("mousedown", this._onDragStart, this);
+
+      this._path.options.className = this._path.options.className
+        ? this._path.options.className + " " + L.Handler.PathDrag.DRAGGING_CLS
+        : L.Handler.PathDrag.DRAGGING_CLS;
+
+      if (this._path._path) {
+        L.DomUtil.addClass(this._path._path, L.Handler.PathDrag.DRAGGING_CLS);
+      }
+    },
 
     /**
-     * @type {L.Point}
+     * Disable dragging
      */
-    this._startPoint = null;
+    removeHooks: function () {
+      this._path.off("mousedown", this._onDragStart, this);
+
+      this._path.options.className = this._path.options.className.replace(
+        new RegExp("\\s+" + L.Handler.PathDrag.DRAGGING_CLS),
+        ""
+      );
+      if (this._path._path) {
+        L.DomUtil.removeClass(
+          this._path._path,
+          L.Handler.PathDrag.DRAGGING_CLS
+        );
+      }
+    },
 
     /**
-     * @type {L.Point}
+     * @return {Boolean}
      */
-    this._dragStartPoint = null;
+    moved: function () {
+      return this._path._dragMoved;
+    },
 
     /**
-     * @type {Boolean}
+     * Start drag
+     * @param  {L.MouseEvent} evt
      */
-    this._mapDraggingWasEnabled = false;
+    _onDragStart: function (evt) {
+      var eventType = evt.originalEvent._simulated
+        ? "touchstart"
+        : evt.originalEvent.type;
 
-  },
+      this._mapDraggingWasEnabled = false;
+      this._startPoint = evt.containerPoint.clone();
+      this._dragStartPoint = evt.containerPoint.clone();
+      this._matrix = [1, 0, 0, 1, 0, 0];
+      L.DomEvent.stop(evt.originalEvent);
 
-  /**
-   * Enable dragging
-   */
-  addHooks: function() {
-    this._path.on('mousedown', this._onDragStart, this);
+      L.DomUtil.addClass(
+        this._path._renderer._container,
+        "leaflet-interactive"
+      );
+      L.DomEvent.on(document, MOVE[eventType], this._onDrag, this).on(
+        document,
+        END[eventType],
+        this._onDragEnd,
+        this
+      );
 
-    this._path.options.className = this._path.options.className ?
-        (this._path.options.className + ' ' + L.Handler.PathDrag.DRAGGING_CLS) :
-         L.Handler.PathDrag.DRAGGING_CLS;
+      if (this._path._map.dragging.enabled()) {
+        // I guess it's required because mousdown gets simulated with a delay
+        //this._path._map.dragging._draggable._onUp(evt);
 
-    if (this._path._path) {
-      L.DomUtil.addClass(this._path._path, L.Handler.PathDrag.DRAGGING_CLS);
-    }
-  },
+        this._path._map.dragging.disable();
+        this._mapDraggingWasEnabled = true;
+      }
+      this._path._dragMoved = false;
 
-  /**
-   * Disable dragging
-   */
-  removeHooks: function() {
-    this._path.off('mousedown', this._onDragStart, this);
+      if (this._path._popup) {
+        // that might be a case on touch devices as well
+        this._path._popup._close();
+      }
 
-    this._path.options.className = this._path.options.className
-      .replace(new RegExp('\\s+' + L.Handler.PathDrag.DRAGGING_CLS), '');
-    if (this._path._path) {
-      L.DomUtil.removeClass(this._path._path, L.Handler.PathDrag.DRAGGING_CLS);
-    }
-  },
+      this._replaceCoordGetters(evt);
+    },
 
-  /**
-   * @return {Boolean}
-   */
-  moved: function() {
-    return this._path._dragMoved;
-  },
+    /**
+     * Dragging
+     * @param  {L.MouseEvent} evt
+     */
+    _onDrag: function (evt) {
+      L.DomEvent.stop(evt);
 
-  /**
-   * Start drag
-   * @param  {L.MouseEvent} evt
-   */
-  _onDragStart: function(evt) {
-    var eventType = evt.originalEvent._simulated ? 'touchstart' : evt.originalEvent.type;
+      var first = evt.touches && evt.touches.length >= 1 ? evt.touches[0] : evt;
+      var containerPoint = this._path._map.mouseEventToContainerPoint(first);
 
-    this._mapDraggingWasEnabled = false;
-    this._startPoint = evt.containerPoint.clone();
-    this._dragStartPoint = evt.containerPoint.clone();
-    this._matrix = [1, 0, 0, 1, 0, 0];
-    L.DomEvent.stop(evt.originalEvent);
+      // skip taps
+      if (evt.type === "touchmove" && !this._path._dragMoved) {
+        var totalMouseDragDistance = this._dragStartPoint.distanceTo(
+          containerPoint
+        );
+        if (totalMouseDragDistance <= this._path._map.options.tapTolerance) {
+          return;
+        }
+      }
 
-    L.DomUtil.addClass(this._path._renderer._container, 'leaflet-interactive');
-    L.DomEvent
-      .on(document, MOVE[eventType], this._onDrag,    this)
-      .on(document, END[eventType],  this._onDragEnd, this);
+      var x = containerPoint.x;
+      var y = containerPoint.y;
 
-    if (this._path._map.dragging.enabled()) {
-      // I guess it's required because mousdown gets simulated with a delay
-      //this._path._map.dragging._draggable._onUp(evt);
+      var dx = x - this._startPoint.x;
+      var dy = y - this._startPoint.y;
 
-      this._path._map.dragging.disable();
-      this._mapDraggingWasEnabled = true;
-    }
-    this._path._dragMoved = false;
+      // Send events only if point was moved
+      if (dx || dy) {
+        if (!this._path._dragMoved) {
+          this._path._dragMoved = true;
+          this._path.fire("dragstart", evt);
+          // we don't want that to happen on click
+          this._path.bringToFront();
+        }
 
-    if (this._path._popup) { // that might be a case on touch devices as well
-      this._path._popup._close();
-    }
+        this._matrix[4] += dx;
+        this._matrix[5] += dy;
 
-    this._replaceCoordGetters(evt);
-  },
+        this._startPoint.x = x;
+        this._startPoint.y = y;
 
-  /**
-   * Dragging
-   * @param  {L.MouseEvent} evt
-   */
-  _onDrag: function(evt) {
-    L.DomEvent.stop(evt);
+        this._path.fire("predrag", evt);
+        this._path._transform(this._matrix);
+        this._path.fire("drag", evt);
+      }
+    },
 
-    var first = (evt.touches && evt.touches.length >= 1 ? evt.touches[0] : evt);
-    var containerPoint = this._path._map.mouseEventToContainerPoint(first);
-
-    // skip taps
-    if (evt.type === 'touchmove' && !this._path._dragMoved) {
-      var totalMouseDragDistance = this._dragStartPoint.distanceTo(containerPoint);
-      if (totalMouseDragDistance <= this._path._map.options.tapTolerance) {
+    /**
+     * Dragging stopped, apply
+     * @param  {L.MouseEvent} evt
+     */
+    _onDragEnd: function (evt) {
+      console.log("onDragEnd");
+      if (!this._path._map) {
         return;
       }
-    }
+      var containerPoint = this._path._map.mouseEventToContainerPoint(evt);
+      var moved = this.moved();
 
-    var x = containerPoint.x;
-    var y = containerPoint.y;
+      // apply matrix
+      if (moved) {
+        this._transformPoints(this._matrix);
+        this._path._updatePath();
+        this._path._project();
+        this._path._transform(null);
 
-    var dx = x - this._startPoint.x;
-    var dy = y - this._startPoint.y;
-
-    // Send events only if point was moved
-    if (dx || dy) {
-      if (!this._path._dragMoved) {
-        this._path._dragMoved = true;
-        this._path.fire('dragstart', evt);
-        // we don't want that to happen on click
-        this._path.bringToFront();
+        L.DomEvent.stop(evt);
       }
 
-      this._matrix[4] += dx;
-      this._matrix[5] += dy;
+      L.DomEvent.off(document, "mousemove touchmove", this._onDrag, this);
+      L.DomEvent.off(document, "mouseup touchend", this._onDragEnd, this);
 
-      this._startPoint.x = x;
-      this._startPoint.y = y;
+      this._restoreCoordGetters();
 
-      this._path.fire('predrag', evt);
-      this._path._transform(this._matrix);
-      this._path.fire('drag', evt);
-    }
-  },
+      // consistency
+      if (moved) {
+        this._path.fire("dragend", {
+          distance: distance(this._dragStartPoint, containerPoint),
+        });
 
-  /**
-   * Dragging stopped, apply
-   * @param  {L.MouseEvent} evt
-   */
-  _onDragEnd: function(evt) {
-    var containerPoint = this._path._map.mouseEventToContainerPoint(evt);
-    var moved = this.moved();
-
-    // apply matrix
-    if (moved) {
-      this._transformPoints(this._matrix);
-      this._path._updatePath();
-      this._path._project();
-      this._path._transform(null);
-
-      L.DomEvent.stop(evt);
-    }
-
-
-    L.DomEvent.off(document, 'mousemove touchmove', this._onDrag,    this);
-    L.DomEvent.off(document, 'mouseup touchend',    this._onDragEnd, this);
-
-    this._restoreCoordGetters();
-
-    // consistency
-    if (moved) {
-      this._path.fire('dragend', {
-        distance: distance(this._dragStartPoint, containerPoint)
-      });
-
-      // hack for skipping the click in canvas-rendered layers
-      var contains = this._path._containsPoint;
-      this._path._containsPoint = L.Util.falseFn;
-      L.Util.requestAnimFrame(function() {
-        L.DomEvent.skipped({ type: 'click' });
-        this._path._containsPoint = contains;
-      }, this);
-    }
-
-    this._matrix          = null;
-    this._startPoint      = null;
-    this._dragStartPoint  = null;
-    this._path._dragMoved = false;
-
-    if (this._mapDraggingWasEnabled) {
-      if (moved) L.DomEvent.fakeStop({ type: 'click' });
-      this._path._map.dragging.enable();
-    }
-  },
-
-
-  /**
-   * Applies transformation, does it in one sweep for performance,
-   * so don't be surprised about the code repetition.
-   *
-   * [ x ]   [ a  b  tx ] [ x ]   [ a * x + b * y + tx ]
-   * [ y ] = [ c  d  ty ] [ y ] = [ c * x + d * y + ty ]
-   *
-   * @param {Array.<Number>} matrix
-   */
-  _transformPoints: function(matrix, dest) {
-    var path = this._path;
-    var i, len, latlng;
-
-    var px = L.point(matrix[4], matrix[5]);
-
-    var crs = path._map.options.crs;
-    var transformation = crs.transformation;
-    var scale = crs.scale(path._map.getZoom());
-    var projection = crs.projection;
-
-    var diff = transformation.untransform(px, scale)
-      .subtract(transformation.untransform(L.point(0, 0), scale));
-    var applyTransform = !dest;
-
-    path._bounds = new L.LatLngBounds();
-
-    // console.time('transform');
-    // all shifts are in-place
-    if (path._point) { // L.Circle
-      dest = projection.unproject(
-        projection.project(path._latlng)._add(diff));
-      if (applyTransform) {
-        path._latlng = dest;
-        path._point._add(px);
+        // hack for skipping the click in canvas-rendered layers
+        var contains = this._path._containsPoint;
+        this._path._containsPoint = L.Util.falseFn;
+        L.Util.requestAnimFrame(function () {
+          L.DomEvent.skipped({ type: "click" });
+          this._path._containsPoint = contains;
+        }, this);
       }
-    } else if (path._rings || path._parts) { // everything else
-      var rings   = path._rings || path._parts;
-      var latlngs = path._latlngs;
-      dest = dest || latlngs;
-      if (!L.Util.isArray(latlngs[0])) { // polyline
-        latlngs = [latlngs];
-        dest    = [dest];
+
+      this._matrix = null;
+      this._startPoint = null;
+      this._dragStartPoint = null;
+      this._path._dragMoved = false;
+
+      if (this._mapDraggingWasEnabled) {
+        if (moved) L.DomEvent.fakeStop({ type: "click" });
+        this._path._map.dragging.enable();
       }
-      for (i = 0, len = rings.length; i < len; i++) {
-        dest[i] = dest[i] || [];
-        for (var j = 0, jj = rings[i].length; j < jj; j++) {
-          latlng     = latlngs[i][j];
-          dest[i][j] = projection
-            .unproject(projection.project(latlng)._add(diff));
-          if (applyTransform) {
-            path._bounds.extend(latlngs[i][j]);
-            rings[i][j]._add(px);
+    },
+
+    /**
+     * Applies transformation, does it in one sweep for performance,
+     * so don't be surprised about the code repetition.
+     *
+     * [ x ]   [ a  b  tx ] [ x ]   [ a * x + b * y + tx ]
+     * [ y ] = [ c  d  ty ] [ y ] = [ c * x + d * y + ty ]
+     *
+     * @param {Array.<Number>} matrix
+     */
+    _transformPoints: function (matrix, dest) {
+      var path = this._path;
+      var i, len, latlng;
+
+      var px = L.point(matrix[4], matrix[5]);
+
+      var crs = path._map.options.crs;
+      var transformation = crs.transformation;
+      var scale = crs.scale(path._map.getZoom());
+      var projection = crs.projection;
+
+      var diff = transformation
+        .untransform(px, scale)
+        .subtract(transformation.untransform(L.point(0, 0), scale));
+      var applyTransform = !dest;
+
+      path._bounds = new L.LatLngBounds();
+
+      // console.time('transform');
+      // all shifts are in-place
+      if (path._point) {
+        // L.Circle
+        dest = projection.unproject(
+          projection.project(path._latlng)._add(diff)
+        );
+        if (applyTransform) {
+          path._latlng = dest;
+          path._point._add(px);
+        }
+      } else if (path._rings || path._parts) {
+        // everything else
+        var rings = path._rings || path._parts;
+        var latlngs = path._latlngs;
+        dest = dest || latlngs;
+        if (!L.Util.isArray(latlngs[0])) {
+          // polyline
+          latlngs = [latlngs];
+          dest = [dest];
+        }
+        for (i = 0, len = rings.length; i < len; i++) {
+          dest[i] = dest[i] || [];
+          for (var j = 0, jj = rings[i].length; j < jj; j++) {
+            latlng = latlngs[i][j];
+            dest[i][j] = projection.unproject(
+              projection.project(latlng)._add(diff)
+            );
+            if (applyTransform) {
+              path._bounds.extend(latlngs[i][j]);
+              rings[i][j]._add(px);
+            }
           }
         }
       }
-    }
-    return dest;
-    // console.timeEnd('transform');
-  },
+      return dest;
+      // console.timeEnd('transform');
+    },
 
+    /**
+     * If you want to read the latlngs during the drag - your right,
+     * but they have to be transformed
+     */
+    _replaceCoordGetters: function () {
+      if (this._path.getLatLng) {
+        // Circle, CircleMarker
+        this._path.getLatLng_ = this._path.getLatLng;
+        this._path.getLatLng = L.Util.bind(function () {
+          return this.dragging._transformPoints(this.dragging._matrix, {});
+        }, this._path);
+      } else if (this._path.getLatLngs) {
+        this._path.getLatLngs_ = this._path.getLatLngs;
+        this._path.getLatLngs = L.Util.bind(function () {
+          return this.dragging._transformPoints(this.dragging._matrix, []);
+        }, this._path);
+      }
+    },
 
-
-  /**
-   * If you want to read the latlngs during the drag - your right,
-   * but they have to be transformed
-   */
-  _replaceCoordGetters: function() {
-    if (this._path.getLatLng) { // Circle, CircleMarker
-      this._path.getLatLng_ = this._path.getLatLng;
-      this._path.getLatLng = L.Util.bind(function() {
-        return this.dragging._transformPoints(this.dragging._matrix, {});
-      }, this._path);
-    } else if (this._path.getLatLngs) {
-      this._path.getLatLngs_ = this._path.getLatLngs;
-      this._path.getLatLngs = L.Util.bind(function() {
-        return this.dragging._transformPoints(this.dragging._matrix, []);
-      }, this._path);
-    }
-  },
-
-
-  /**
-   * Put back the getters
-   */
-  _restoreCoordGetters: function() {
-    if (this._path.getLatLng_) {
-      this._path.getLatLng = this._path.getLatLng_;
-      delete this._path.getLatLng_;
-    } else if (this._path.getLatLngs_) {
-      this._path.getLatLngs = this._path.getLatLngs_;
-      delete this._path.getLatLngs_;
-    }
+    /**
+     * Put back the getters
+     */
+    _restoreCoordGetters: function () {
+      if (this._path.getLatLng_) {
+        this._path.getLatLng = this._path.getLatLng_;
+        delete this._path.getLatLng_;
+      } else if (this._path.getLatLngs_) {
+        this._path.getLatLngs = this._path.getLatLngs_;
+        delete this._path.getLatLngs_;
+      }
+    },
   }
-
-});
-
+);
 
 /**
  * @param  {L.Path} layer
  * @return {L.Path}
  */
-L.Handler.PathDrag.makeDraggable = function(layer) {
+L.Handler.PathDrag.makeDraggable = function (layer) {
   layer.dragging = new L.Handler.PathDrag(layer);
   return layer;
 };
-
 
 /**
  * Also expose as a method
  * @return {L.Path}
  */
-L.Path.prototype.makeDraggable = function() {
+L.Path.prototype.makeDraggable = function () {
   return L.Handler.PathDrag.makeDraggable(this);
 };
 
-
-L.Path.addInitHook(function() {
+L.Path.addInitHook(function () {
   if (this.options.draggable) {
     // ensure interactive
     this.options.interactive = true;
