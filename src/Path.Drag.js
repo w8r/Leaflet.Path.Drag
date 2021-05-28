@@ -195,6 +195,9 @@ L.Handler.PathDrag = L.Handler.extend(
      * @param  {L.MouseEvent} evt
      */
     _onDragEnd: function (evt) {
+      if (!this._path._map) {
+        return;
+      }
       var containerPoint = this._path._map.mouseEventToContainerPoint(evt);
       var moved = this.moved();
 
