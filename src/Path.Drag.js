@@ -196,7 +196,6 @@ L.Handler.PathDrag = L.Handler.extend(
      * @param  {L.MouseEvent} evt
      */
     _onDragEnd: function (evt) {
-      console.log("onDragEnd");
       if (!this._path._map) {
         return;
       }
