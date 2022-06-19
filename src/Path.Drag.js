@@ -169,6 +169,8 @@ L.Handler.PathDrag = L.Handler.extend(
       var x = containerPoint.x;
       var y = containerPoint.y;
 
+      console.log('v', this._startPoint);
+
       var dx = x - this._startPoint.x;
       var dy = y - this._startPoint.y;
 
