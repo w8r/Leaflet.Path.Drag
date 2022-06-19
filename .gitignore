@@ -30,3 +30,4 @@ node_modules
 # IDE
 *.iml
 .DS_Store
+dist
