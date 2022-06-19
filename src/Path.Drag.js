@@ -237,8 +237,6 @@ L.Handler.PathDrag = L.Handler.extend(
         L.Util.requestAnimFrame(function () {
           this._path._dragMoved = false;
           this._path.options.interactive = true;
-          this._matrix = null;
-
           this._path._containsPoint = contains;
         }, this);
       }
