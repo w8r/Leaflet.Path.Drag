@@ -29,5 +29,5 @@ jobs:
       - run: npm ci
       - run: npm run build --if-present
       - run: sudo apt-get install xvfb
-      - run: xvfb-run --auto-servernum npm test
+      #- run: xvfb-run --auto-servernum npm test
       - run: npm test

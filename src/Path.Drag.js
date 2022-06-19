@@ -114,8 +114,6 @@ L.Handler.PathDrag = L.Handler.extend(
       this._mapDraggingWasEnabled = false;
       this._startPoint = evt.containerPoint.clone();
 
-      console.log('_onDragStart', this._startPoint);
-
       this._dragStartPoint = evt.containerPoint.clone();
       this._matrix = [1, 0, 0, 1, 0, 0];
       L.DomEvent.stop(evt.originalEvent);
@@ -171,8 +169,6 @@ L.Handler.PathDrag = L.Handler.extend(
 
       var x = containerPoint.x;
       var y = containerPoint.y;
-
-      console.log('v', this._startPoint);
 
       var dx = x - this._startPoint.x;
       var dy = y - this._startPoint.y;
