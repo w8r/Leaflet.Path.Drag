@@ -4,7 +4,7 @@
   "description": "Drag functionality for Leaflet vector layers",
   "main": "index.js",
   "scripts": {
-    "test": "browserify --transform [ babelify --presets [ es2015 ] ] ./test/*.test.js | tap-closer | smokestack | tap-status",
+    "test": "browserify --transform [ babelify --presets [ es2015 ] ] ./test/*.test.js | tap-closer | smokestack -b chrome | tap-status",
     "start": "npm run watch & npm run server",
     "server": "http-server -p 3002",
     "lint": "eslint ./src/",
