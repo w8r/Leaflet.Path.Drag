@@ -1,7 +1,13 @@
 {
   "env": {
     "browser": true
+    //"es6": true
   },
+  // "parser": "babel-eslint",
+  // "parserOptions": {
+  //   "sourceType": "module",
+  //   "allowImportExportEverywhere": true
+  // },
   "globals": {
     "L": true
   },
@@ -12,19 +18,13 @@
     "comma-style": 2,
     "curly": 0,
     "dot-notation": 0,
-    "eqeqeq": [
-      2,
-      "allow-null"
-    ],
+    "eqeqeq": [2, "allow-null"],
     "guard-for-in": 2,
     "key-spacing": 0,
     "new-cap": 2,
     "no-bitwise": 2,
     "no-caller": 2,
-    "no-cond-assign": [
-      2,
-      "except-parens"
-    ],
+    "no-cond-assign": [2, "except-parens"],
     "no-debugger": 2,
     "no-empty": 2,
     "no-eval": 2,
@@ -41,16 +41,16 @@
     "no-proto": 2,
     "no-script-url": 2,
     "no-sequences": 2,
-    "no-shadow": 2,
+    "no-shadow": 0,
     "no-undef": 2,
     "no-underscore-dangle": 0,
-    "no-unused-vars": [2, {"vars": "all", "args": "none"}],
+    "no-unused-vars": [2, { "vars": "all", "args": "none" }],
     "no-use-before-define": [2, "nofunc"],
     "no-with": 2,
-    "quotes": [2, "single"],
+    "quotes": 0,
     "semi": [2, "always"],
     "no-extra-semi": 2, // disallow unnecessary semicolons
-    "semi-spacing": [1, {"before": false, "after": true}], // enforce spacing before and after semicolons
+    "semi-spacing": [1, { "before": false, "after": true }], // enforce spacing before and after semicolons
     "strict": 0,
     "valid-typeof": 2,
     "wrap-iife": [2, "inside"]

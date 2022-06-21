@@ -1,12 +1,13 @@
-function TRUE_FN () { return true; }
+function TRUE_FN() {
+  return true;
+}
 
 L.Canvas.include({
-
   /**
    * Do nothing
    * @param  {L.Path} layer
    */
-  _resetTransformPath: function(layer) {
+  _resetTransformPath: function (layer) {
     if (!this._containerCopy) return;
 
     delete this._containerCopy;
@@ -18,7 +19,6 @@ L.Canvas.include({
       this._requestRedraw(layer);
     }
   },
-
 
   /**
    * Algorithm outline:
@@ -35,20 +35,22 @@ L.Canvas.include({
    * @param  {L.Path}         layer
    * @param  {Array.<Number>} matrix
    */
-  transformPath: function(layer, matrix) {
-    var copy   = this._containerCopy;
-    var ctx    = this._ctx, copyCtx;
-    var m      = L.Browser.retina ? 2 : 1;
+  transformPath: function (layer, matrix) {
+    var copy = this._containerCopy;
+    var ctx = this._ctx,
+      copyCtx;
+    var m = L.Browser.retina ? 2 : 1;
     var bounds = this._bounds;
-    var size   = bounds.getSize();
-    var pos    = bounds.min;
+    var size = bounds.getSize();
+    var pos = bounds.min;
 
-    if (!copy) { // get copy of all rendered layers
+    if (!copy) {
+      // get copy of all rendered layers
       copy = this._containerCopy = document.createElement('canvas');
       copyCtx = copy.getContext('2d');
       // document.body.appendChild(copy);
 
-      copy.width  = m * size.x;
+      copy.width = m * size.x;
       copy.height = m * size.y;
 
       this._removePath(layer);
@@ -60,7 +62,7 @@ L.Canvas.include({
 
       // avoid flickering because of the 'mouseover's
       layer._containsPoint_ = layer._containsPoint;
-      layer._containsPoint  = TRUE_FN;
+      layer._containsPoint = TRUE_FN;
     }
 
     ctx.save();
@@ -78,6 +80,5 @@ L.Canvas.include({
     this._drawing = false;
 
     ctx.restore();
-  }
-
+  },
 });
