@@ -1,8 +1,12 @@
 {
   "name": "leaflet-path-drag",
-  "version": "1.8.0-beta.1",
+  "version": "1.8.0-beta.2",
   "description": "Drag functionality for Leaflet vector layers",
   "main": "index.js",
+  "files": [
+    "index.js",
+    "dist/*.js"
+  ],
   "scripts": {
     "test": "browserify --transform [ babelify --presets [ es2015 ] ] ./test/*.test.js | tape-run --render='tap-spec' | tap-status",
     "start": "npm run watch & npm run server",
