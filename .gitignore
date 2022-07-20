@@ -29,5 +29,6 @@ node_modules
 
 # IDE
 *.iml
+*.idea
 .DS_Store
 dist
