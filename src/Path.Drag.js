@@ -292,27 +292,21 @@ L.Handler.PathDrag = L.Handler.extend(
           latlngs = [latlngs];
           dest = [dest];
         }
-        for (i = 0, len = rings.length; i < len; i++) {
+        for (i = 0, len = latlngs.length; i < len; i++) {
           dest[i] = dest[i] || [];
-          for (var j = 0, jj = rings[i].length; j < jj; j++) {
+          for (var j = 0, jj = latlngs[i].length; j < jj; j++) {
             latlng = latlngs[i][j];
-            console.log("latlng: " + JSON.stringify(latlng));
             if (L.Util.isArray(latlng)) { // MultiPolygon
-              console.log("It's a multipolygon!");
-              console.log("rings: " + JSON.stringify(rings));
-              console.log("dest: " + JSON.stringify(dest));
-              for (var k = 0, kk = rings[i][j].length; k < kk; k++) {
+              for (var k = 0, kk = latlngs[i][j].length; k < kk; k++) {
                 latlng = latlngs[i][j][k];
-                console.log("latlng: " + latlng);
                 dest[i][j][k] = projection.unproject(
                   projection.project(latlng)._add(diff)
                 );
                 if (applyTransform) {
-                  console.log("applying transform");
                   path._bounds.extend(latlngs[i][j][k]);
-                  rings[i][j][k]._add(px);
                 }
               }
+              rings[i][j]._add(px);
             } else { // Polygon
               dest[i][j] = projection.unproject(
                 projection.project(latlng)._add(diff)
