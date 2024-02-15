@@ -1,4 +1,6 @@
-L.SVG.include({
+import { SVG } from 'leaflet';
+
+SVG.include({
   /**
    * Reset transform matrix
    */

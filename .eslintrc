@@ -1,13 +1,13 @@
 {
   "env": {
-    "browser": true
-    //"es6": true
+    "browser": true,
+    "es6": true
   },
   // "parser": "babel-eslint",
-  // "parserOptions": {
-  //   "sourceType": "module",
-  //   "allowImportExportEverywhere": true
-  // },
+  "parserOptions": {
+    "sourceType": "module",
+    "allowImportExportEverywhere": true
+  },
   "globals": {
     "L": true
   },

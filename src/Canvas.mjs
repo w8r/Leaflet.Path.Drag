@@ -1,8 +1,10 @@
+import { Canvas, Browser } from 'leaflet';
+
 function TRUE_FN() {
   return true;
 }
 
-L.Canvas.include({
+Canvas.include({
   /**
    * Do nothing
    * @param  {L.Path} layer
@@ -39,7 +41,7 @@ L.Canvas.include({
     var copy = this._containerCopy;
     var ctx = this._ctx,
       copyCtx;
-    var m = L.Browser.retina ? 2 : 1;
+    var m = Browser.retina ? 2 : 1;
     var bounds = this._bounds;
     var size = bounds.getSize();
     var pos = bounds.min;

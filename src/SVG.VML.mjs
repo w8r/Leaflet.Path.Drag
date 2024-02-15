@@ -1,5 +1,7 @@
-L.SVG.include(
-  !L.Browser.vml
+import { SVG, Browser } from 'leaflet';
+
+SVG.include(
+  !Browser.vml
     ? {}
     : {
         /**
@@ -24,7 +26,7 @@ L.SVG.include(
           var skew = layer._skew;
 
           if (!skew) {
-            skew = L.SVG.create('skew');
+            skew = SVG.create('skew');
             layer._path.appendChild(skew);
             skew.style.behavior = 'url(#default#VML)';
             layer._skew = skew;
