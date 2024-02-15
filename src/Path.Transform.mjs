@@ -1,3 +1,5 @@
+import { Path } from 'leaflet';
+
 /**
  * Leaflet vector features drag functionality
  * @author Alexander Milevski <info@w8r.name>
@@ -8,7 +10,8 @@
  * Matrix transform path for SVG/VML
  * Renderer-independent
  */
-L.Path.include({
+
+Path.include({
   /**
    * Applies matrix transformation to SVG
    * @param {Array.<Number>?} matrix

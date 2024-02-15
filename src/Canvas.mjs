@@ -1,8 +1,10 @@
+import { Canvas, Browser } from 'leaflet';
+
 function TRUE_FN() {
   return true;
 }
 
-L.Canvas.include({
+Canvas.include({
   /**
    * Do nothing
    * @param  {L.Path} layer
@@ -36,13 +38,13 @@ L.Canvas.include({
    * @param  {Array.<Number>} matrix
    */
   transformPath: function (layer, matrix) {
-    var copy = this._containerCopy;
-    var ctx = this._ctx,
-      copyCtx;
-    var m = L.Browser.retina ? 2 : 1;
-    var bounds = this._bounds;
-    var size = bounds.getSize();
-    var pos = bounds.min;
+    let copy = this._containerCopy;
+    const ctx = this._ctx;
+    let copyCtx;
+    const m = Browser.retina ? 2 : 1;
+    const bounds = this._bounds;
+    const size = bounds.getSize();
+    const pos = bounds.min;
 
     if (!copy) {
       // get copy of all rendered layers

@@ -1,5 +1,7 @@
-L.SVG.include(
-  !L.Browser.vml
+import { SVG, Browser } from 'leaflet';
+
+SVG.include(
+  !Browser.vml
     ? {}
     : {
         /**
@@ -21,17 +23,17 @@ L.SVG.include(
          * @param {Array.<Number>} matrix
          */
         transformPath: function (layer, matrix) {
-          var skew = layer._skew;
+          let skew = layer._skew;
 
           if (!skew) {
-            skew = L.SVG.create('skew');
+            skew = SVG.create('skew');
             layer._path.appendChild(skew);
             skew.style.behavior = 'url(#default#VML)';
             layer._skew = skew;
           }
 
           // handle skew/translate separately, cause it's broken
-          var mt =
+          const mt =
             matrix[0].toFixed(8) +
             ' ' +
             matrix[1].toFixed(8) +
@@ -40,24 +42,24 @@ L.SVG.include(
             ' ' +
             matrix[3].toFixed(8) +
             ' 0 0';
-          var offset =
+          const offset =
             Math.floor(matrix[4]).toFixed() +
             ', ' +
             Math.floor(matrix[5]).toFixed() +
             '';
 
-          var s = this._path.style;
-          var l = parseFloat(s.left);
-          var t = parseFloat(s.top);
-          var w = parseFloat(s.width);
-          var h = parseFloat(s.height);
+          const s = this._path.style;
+          let l = parseFloat(s.left);
+          let t = parseFloat(s.top);
+          let w = parseFloat(s.width);
+          let h = parseFloat(s.height);
 
           if (isNaN(l)) l = 0;
           if (isNaN(t)) t = 0;
           if (isNaN(w) || !w) w = 1;
           if (isNaN(h) || !h) h = 1;
 
-          var origin =
+          const origin =
             (-l / w - 0.5).toFixed(8) + ' ' + (-t / h - 0.5).toFixed(8);
 
           skew.on = 'f';

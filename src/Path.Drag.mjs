@@ -1,11 +1,21 @@
-var END = {
+import {
+  Path,
+  Handler,
+  DomEvent,
+  DomUtil,
+  Util,
+  point,
+  LatLngBounds,
+} from 'leaflet';
+
+const END = {
   mousedown: 'mouseup',
   touchstart: 'touchend',
   pointerdown: 'touchend',
   MSPointerDown: 'touchend',
 };
 
-var MOVE = {
+const MOVE = {
   mousedown: 'mousemove',
   touchstart: 'touchmove',
   pointerdown: 'touchmove',
@@ -13,8 +23,8 @@ var MOVE = {
 };
 
 function distance(a, b) {
-  var dx = a.x - b.x,
-    dy = a.y - b.y;
+  const dx = a.x - b.x;
+  const dy = a.y - b.y;
   return Math.sqrt(dx * dx + dy * dy);
 }
 
@@ -23,7 +33,7 @@ function distance(a, b) {
  * @class L.Path.Drag
  * @extends {L.Handler}
  */
-L.Handler.PathDrag = L.Handler.extend(
+Handler.PathDrag = Handler.extend(
   /** @lends  L.Path.Drag.prototype */ {
     statics: {
       DRAGGING_CLS: 'leaflet-path-draggable',
@@ -69,11 +79,11 @@ L.Handler.PathDrag = L.Handler.extend(
       this._path.on('mousedown', this._onDragStart, this);
 
       this._path.options.className = this._path.options.className
-        ? this._path.options.className + ' ' + L.Handler.PathDrag.DRAGGING_CLS
-        : L.Handler.PathDrag.DRAGGING_CLS;
+        ? this._path.options.className + ' ' + Handler.PathDrag.DRAGGING_CLS
+        : Handler.PathDrag.DRAGGING_CLS;
 
       if (this._path._path) {
-        L.DomUtil.addClass(this._path._path, L.Handler.PathDrag.DRAGGING_CLS);
+        DomUtil.addClass(this._path._path, Handler.PathDrag.DRAGGING_CLS);
       }
     },
 
@@ -84,14 +94,11 @@ L.Handler.PathDrag = L.Handler.extend(
       this._path.off('mousedown', this._onDragStart, this);
 
       this._path.options.className = this._path.options.className.replace(
-        new RegExp('\\s+' + L.Handler.PathDrag.DRAGGING_CLS),
+        new RegExp('\\s+' + Handler.PathDrag.DRAGGING_CLS),
         ''
       );
       if (this._path._path) {
-        L.DomUtil.removeClass(
-          this._path._path,
-          L.Handler.PathDrag.DRAGGING_CLS
-        );
+        DomUtil.removeClass(this._path._path, Handler.PathDrag.DRAGGING_CLS);
       }
     },
 
@@ -107,7 +114,7 @@ L.Handler.PathDrag = L.Handler.extend(
      * @param  {L.MouseEvent} evt
      */
     _onDragStart: function (evt) {
-      var eventType = evt.originalEvent._simulated
+      const eventType = evt.originalEvent._simulated
         ? 'touchstart'
         : evt.originalEvent.type;
 
@@ -116,13 +123,10 @@ L.Handler.PathDrag = L.Handler.extend(
 
       this._dragStartPoint = evt.containerPoint.clone();
       this._matrix = [1, 0, 0, 1, 0, 0];
-      L.DomEvent.stop(evt.originalEvent);
+      DomEvent.stop(evt.originalEvent);
 
-      L.DomUtil.addClass(
-        this._path._renderer._container,
-        'leaflet-interactive'
-      );
-      L.DomEvent.on(document, MOVE[eventType], this._onDrag, this).on(
+      DomUtil.addClass(this._path._renderer._container, 'leaflet-interactive');
+      DomEvent.on(document, MOVE[eventType], this._onDrag, this).on(
         document,
         END[eventType],
         this._onDragEnd,
@@ -153,25 +157,26 @@ L.Handler.PathDrag = L.Handler.extend(
      * @param  {L.MouseEvent} evt
      */
     _onDrag: function (evt) {
-      L.DomEvent.stop(evt);
+      DomEvent.stop(evt);
 
-      var first = evt.touches && evt.touches.length >= 1 ? evt.touches[0] : evt;
-      var containerPoint = this._path._map.mouseEventToContainerPoint(first);
+      const first =
+        evt.touches && evt.touches.length >= 1 ? evt.touches[0] : evt;
+      const containerPoint = this._path._map.mouseEventToContainerPoint(first);
 
       // skip taps
       if (evt.type === 'touchmove' && !this._path._dragMoved) {
-        var totalMouseDragDistance =
+        const totalMouseDragDistance =
           this._dragStartPoint.distanceTo(containerPoint);
         if (totalMouseDragDistance <= this._path._map.options.tapTolerance) {
           return;
         }
       }
 
-      var x = containerPoint.x;
-      var y = containerPoint.y;
+      const x = containerPoint.x;
+      const y = containerPoint.y;
 
-      var dx = x - this._startPoint.x;
-      var dy = y - this._startPoint.y;
+      const dx = x - this._startPoint.x;
+      const dy = y - this._startPoint.y;
 
       // Send events only if point was moved
       if (dx || dy) {
@@ -202,8 +207,8 @@ L.Handler.PathDrag = L.Handler.extend(
      * @param  {L.MouseEvent} evt
      */
     _onDragEnd: function (evt) {
-      var containerPoint = this._path._map.mouseEventToContainerPoint(evt);
-      var moved = this.moved();
+      const containerPoint = this._path._map.mouseEventToContainerPoint(evt);
+      const moved = this.moved();
 
       // apply matrix
       if (moved) {
@@ -212,11 +217,11 @@ L.Handler.PathDrag = L.Handler.extend(
         this._path._project();
         this._path._transform(null);
 
-        L.DomEvent.stop(evt);
+        DomEvent.stop(evt);
       }
 
-      L.DomEvent.off(document, 'mousemove touchmove', this._onDrag, this);
-      L.DomEvent.off(document, 'mouseup touchend', this._onDragEnd, this);
+      DomEvent.off(document, 'mousemove touchmove', this._onDrag, this);
+      DomEvent.off(document, 'mouseup touchend', this._onDragEnd, this);
 
       this._restoreCoordGetters();
 
@@ -227,10 +232,10 @@ L.Handler.PathDrag = L.Handler.extend(
         });
 
         // hack for skipping the click in canvas-rendered layers
-        var contains = this._path._containsPoint;
-        this._path._containsPoint = L.Util.falseFn;
+        const contains = this._path._containsPoint;
+        this._path._containsPoint = Util.falseFn;
 
-        L.Util.requestAnimFrame(function () {
+        Util.requestAnimFrame(function () {
           this._path._dragMoved = false;
           this._path.options.interactive = true;
           this._path._containsPoint = contains;
@@ -253,22 +258,21 @@ L.Handler.PathDrag = L.Handler.extend(
      * @param {Array.<Number>} matrix
      */
     _transformPoints: function (matrix, dest) {
-      var path = this._path;
-      var i, len, latlng;
+      const path = this._path;
 
-      var px = L.point(matrix[4], matrix[5]);
+      const px = L.point(matrix[4], matrix[5]);
 
-      var crs = path._map.options.crs;
-      var transformation = crs.transformation;
-      var scale = crs.scale(path._map.getZoom());
-      var projection = crs.projection;
+      const crs = path._map.options.crs;
+      const transformation = crs.transformation;
+      const scale = crs.scale(path._map.getZoom());
+      const projection = crs.projection;
 
-      var diff = transformation
+      const diff = transformation
         .untransform(px, scale)
-        .subtract(transformation.untransform(L.point(0, 0), scale));
-      var applyTransform = !dest;
+        .subtract(transformation.untransform(point(0, 0), scale));
+      const applyTransform = !dest;
 
-      path._bounds = new L.LatLngBounds();
+      path._bounds = new LatLngBounds();
 
       // console.time('transform');
       // all shifts are in-place
@@ -283,18 +287,18 @@ L.Handler.PathDrag = L.Handler.extend(
         }
       } else if (path._rings || path._parts) {
         // everything else
-        var rings = path._rings || path._parts;
-        var latlngs = path._latlngs;
+        const rings = path._rings || path._parts;
+        let latlngs = path._latlngs;
         dest = dest || latlngs;
-        if (!L.Util.isArray(latlngs[0])) {
+        if (!Util.isArray(latlngs[0])) {
           // polyline
           latlngs = [latlngs];
           dest = [dest];
         }
-        for (i = 0, len = rings.length; i < len; i++) {
+        for (let i = 0, len = rings.length; i < len; i++) {
           dest[i] = dest[i] || [];
-          for (var j = 0, jj = rings[i].length; j < jj; j++) {
-            latlng = latlngs[i][j];
+          for (let j = 0, jj = rings[i].length; j < jj; j++) {
+            const latlng = latlngs[i][j];
             dest[i][j] = projection.unproject(
               projection.project(latlng)._add(diff)
             );
@@ -317,12 +321,12 @@ L.Handler.PathDrag = L.Handler.extend(
       if (this._path.getLatLng) {
         // Circle, CircleMarker
         this._path.getLatLng_ = this._path.getLatLng;
-        this._path.getLatLng = L.Util.bind(function () {
+        this._path.getLatLng = Util.bind(function () {
           return this.dragging._transformPoints(this.dragging._matrix, {});
         }, this._path);
       } else if (this._path.getLatLngs) {
         this._path.getLatLngs_ = this._path.getLatLngs;
-        this._path.getLatLngs = L.Util.bind(function () {
+        this._path.getLatLngs = Util.bind(function () {
           return this.dragging._transformPoints(this.dragging._matrix, []);
         }, this._path);
       }
@@ -347,8 +351,8 @@ L.Handler.PathDrag = L.Handler.extend(
  * @param  {L.Path} layer
  * @return {L.Path}
  */
-L.Handler.PathDrag.makeDraggable = function (layer) {
-  layer.dragging = new L.Handler.PathDrag(layer);
+Handler.PathDrag.makeDraggable = function (layer) {
+  layer.dragging = new Handler.PathDrag(layer);
   return layer;
 };
 
@@ -356,11 +360,11 @@ L.Handler.PathDrag.makeDraggable = function (layer) {
  * Also expose as a method
  * @return {L.Path}
  */
-L.Path.prototype.makeDraggable = function () {
-  return L.Handler.PathDrag.makeDraggable(this);
+Path.prototype.makeDraggable = function () {
+  return Handler.PathDrag.makeDraggable(this);
 };
 
-L.Path.addInitHook(function () {
+Path.addInitHook(function () {
   if (this.options.draggable) {
     // ensure interactive
     this.options.interactive = true;
@@ -368,10 +372,13 @@ L.Path.addInitHook(function () {
     if (this.dragging) {
       this.dragging.enable();
     } else {
-      L.Handler.PathDrag.makeDraggable(this);
+      Handler.PathDrag.makeDraggable(this);
       this.dragging.enable();
     }
   } else if (this.dragging) {
     this.dragging.disable();
   }
 });
+
+const PathDrag = Handler.PathDrag;
+export { PathDrag };
