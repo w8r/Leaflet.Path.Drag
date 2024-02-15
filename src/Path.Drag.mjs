@@ -8,14 +8,14 @@ import {
   LatLngBounds,
 } from 'leaflet';
 
-var END = {
+const END = {
   mousedown: 'mouseup',
   touchstart: 'touchend',
   pointerdown: 'touchend',
   MSPointerDown: 'touchend',
 };
 
-var MOVE = {
+const MOVE = {
   mousedown: 'mousemove',
   touchstart: 'touchmove',
   pointerdown: 'touchmove',
@@ -23,8 +23,8 @@ var MOVE = {
 };
 
 function distance(a, b) {
-  var dx = a.x - b.x,
-    dy = a.y - b.y;
+  const dx = a.x - b.x;
+  const dy = a.y - b.y;
   return Math.sqrt(dx * dx + dy * dy);
 }
 
@@ -114,7 +114,7 @@ Handler.PathDrag = Handler.extend(
      * @param  {L.MouseEvent} evt
      */
     _onDragStart: function (evt) {
-      var eventType = evt.originalEvent._simulated
+      const eventType = evt.originalEvent._simulated
         ? 'touchstart'
         : evt.originalEvent.type;
 
@@ -159,23 +159,24 @@ Handler.PathDrag = Handler.extend(
     _onDrag: function (evt) {
       DomEvent.stop(evt);
 
-      var first = evt.touches && evt.touches.length >= 1 ? evt.touches[0] : evt;
-      var containerPoint = this._path._map.mouseEventToContainerPoint(first);
+      const first =
+        evt.touches && evt.touches.length >= 1 ? evt.touches[0] : evt;
+      const containerPoint = this._path._map.mouseEventToContainerPoint(first);
 
       // skip taps
       if (evt.type === 'touchmove' && !this._path._dragMoved) {
-        var totalMouseDragDistance =
+        const totalMouseDragDistance =
           this._dragStartPoint.distanceTo(containerPoint);
         if (totalMouseDragDistance <= this._path._map.options.tapTolerance) {
           return;
         }
       }
 
-      var x = containerPoint.x;
-      var y = containerPoint.y;
+      const x = containerPoint.x;
+      const y = containerPoint.y;
 
-      var dx = x - this._startPoint.x;
-      var dy = y - this._startPoint.y;
+      const dx = x - this._startPoint.x;
+      const dy = y - this._startPoint.y;
 
       // Send events only if point was moved
       if (dx || dy) {
@@ -206,8 +207,8 @@ Handler.PathDrag = Handler.extend(
      * @param  {L.MouseEvent} evt
      */
     _onDragEnd: function (evt) {
-      var containerPoint = this._path._map.mouseEventToContainerPoint(evt);
-      var moved = this.moved();
+      const containerPoint = this._path._map.mouseEventToContainerPoint(evt);
+      const moved = this.moved();
 
       // apply matrix
       if (moved) {
@@ -231,7 +232,7 @@ Handler.PathDrag = Handler.extend(
         });
 
         // hack for skipping the click in canvas-rendered layers
-        var contains = this._path._containsPoint;
+        const contains = this._path._containsPoint;
         this._path._containsPoint = Util.falseFn;
 
         Util.requestAnimFrame(function () {
@@ -257,20 +258,19 @@ Handler.PathDrag = Handler.extend(
      * @param {Array.<Number>} matrix
      */
     _transformPoints: function (matrix, dest) {
-      var path = this._path;
-      var i, len, latlng;
+      const path = this._path;
 
-      var px = L.point(matrix[4], matrix[5]);
+      const px = L.point(matrix[4], matrix[5]);
 
-      var crs = path._map.options.crs;
-      var transformation = crs.transformation;
-      var scale = crs.scale(path._map.getZoom());
-      var projection = crs.projection;
+      const crs = path._map.options.crs;
+      const transformation = crs.transformation;
+      const scale = crs.scale(path._map.getZoom());
+      const projection = crs.projection;
 
-      var diff = transformation
+      const diff = transformation
         .untransform(px, scale)
         .subtract(transformation.untransform(point(0, 0), scale));
-      var applyTransform = !dest;
+      const applyTransform = !dest;
 
       path._bounds = new LatLngBounds();
 
@@ -287,18 +287,18 @@ Handler.PathDrag = Handler.extend(
         }
       } else if (path._rings || path._parts) {
         // everything else
-        var rings = path._rings || path._parts;
-        var latlngs = path._latlngs;
+        const rings = path._rings || path._parts;
+        let latlngs = path._latlngs;
         dest = dest || latlngs;
         if (!Util.isArray(latlngs[0])) {
           // polyline
           latlngs = [latlngs];
           dest = [dest];
         }
-        for (i = 0, len = rings.length; i < len; i++) {
+        for (let i = 0, len = rings.length; i < len; i++) {
           dest[i] = dest[i] || [];
-          for (var j = 0, jj = rings[i].length; j < jj; j++) {
-            latlng = latlngs[i][j];
+          for (let j = 0, jj = rings[i].length; j < jj; j++) {
+            const latlng = latlngs[i][j];
             dest[i][j] = projection.unproject(
               projection.project(latlng)._add(diff)
             );

@@ -12,6 +12,7 @@
     "L": true
   },
   "rules": {
+    "prefer-const": 2,
     "yoda": 0,
     "block-scoped-var": 2,
     "camelcase": 1,

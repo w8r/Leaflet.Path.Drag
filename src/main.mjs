@@ -3,11 +3,11 @@ import * as L from 'leaflet';
 import '../src';
 
 ////////////////////////////////////////////////////////////////////////////////
-var map = (window.map = new L.Map('map', {
+const map = (window.map = new L.Map('map', {
   // crs: L.CRS.EPSG4326 // that was tested as well
 }).setView([22.42658, 114.1952], 11));
 
-var renderer = new L.Canvas();
+const renderer = new L.Canvas();
 
 L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
   attribution:
@@ -17,12 +17,12 @@ L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
 
 ////////////////////////////////////////////////////////////////////////////////
 function interpolateArr(array, insert) {
-  var res = [];
+  const res = [];
   array.forEach((p, i, arr) => {
     res.push(p.concat());
 
     if (i < arr.length - 1) {
-      var diff = [arr[i + 1][0] - p[0], arr[i + 1][1] - p[1]];
+      const diff = [arr[i + 1][0] - p[0], arr[i + 1][1] - p[1]];
       for (let j = 1; j < insert; j++) {
         res.push([
           p[0] + (diff[0] * j) / insert,
