@@ -24,7 +24,8 @@
     "lint": "eslint ./src/*.mjs",
     "build-js": "vite build",
     "build": "npm run lint && npm run build-js",
-    "release": "git push origin master && git checkout gh-pages && git merge master && git push origin gh-pages && git checkout master && npm publish"
+    "release": "git push origin master && git checkout gh-pages && git merge master && git push origin gh-pages && git checkout master && npm publish",
+    "prepare": "npx playwright install chromium"
   },
   "keywords": [
     "leaflet",
@@ -46,6 +47,7 @@
     "singleQuote": true
   },
   "devDependencies": {
+    "@vitest/browser": "^1.2.2",
     "babel-core": "^6.26.3",
     "babel-eslint": "^10.1.0",
     "babel-preset-es2015": "^6.24.1",
@@ -53,14 +55,21 @@
     "browserify": "^14.4.0",
     "eslint": "^6.8.0",
     "faucet": "0.0.1",
+    "jsdom": "^24.0.0",
     "leaflet": "^1.9.4",
-    "prosthetic-hand": "^1.3.1",
+    "playwright": "^1.41.2",
+    "pretty-format": "^29.7.0",
+    "prosthetic-hand": "^2.0.0",
     "smokestack": "^3.6.0",
     "tap-spec": "^5.0.0",
     "tap-status": "^1.0.1",
     "tape": "^5.5.3",
     "tape-run": "^10.0.0",
     "uglify-js": "^3.0.21",
-    "vite": "^5.1.3"
+    "vite": "^5.1.3",
+    "vitest": "^1.2.2"
+  },
+  "dependencies": {
+    "diff-sequences": "^29.6.3"
   }
 }

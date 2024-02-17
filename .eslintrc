@@ -9,7 +9,8 @@
     "allowImportExportEverywhere": true
   },
   "globals": {
-    "L": true
+    "L": true,
+    "require": true
   },
   "rules": {
     "prefer-const": 2,
