@@ -1,7 +1,7 @@
 {
   "name": "leaflet-path-drag",
   "type": "module",
-  "version": "1.9.4",
+  "version": "1.9.5",
   "description": "Drag functionality for Leaflet vector layers",
   "main": "dist/index.mjs",
   "module": "dist/index.mjs",
