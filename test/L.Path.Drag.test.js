@@ -13,7 +13,7 @@ document.head.appendChild(stylesheet);
 const center = [22.42658, 114.1952];
 
 const createMap = () => {
-  let div = document.createElement('div');
+  const div = document.createElement('div');
   div.style.width = div.style.height = '500px';
 
   document.body.appendChild(div);
@@ -101,7 +101,7 @@ tape('L.Path.Drag: SVG ', (t2) => {
 
     const h = new Hand({
       onStop: () => {
-        let c = map.getCenter();
+        const c = map.getCenter();
         map.removeLayer(path);
         map.off('click', failIfClickPropagates);
         t.deepEquals(center, [c.lat, c.lng], 'map center didnt change');
@@ -157,7 +157,7 @@ tape('L.Path.Drag: SVG ', (t2) => {
 
     const h = new Hand({
       onStop: () => {
-        let c = map.getCenter();
+        const c = map.getCenter();
         map.removeLayer(path);
         map.off('click', failIfClickPropagates);
         t.deepEquals(center, [c.lat, c.lng], 'map center didnt change');
@@ -213,7 +213,7 @@ tape('L.Path.Drag: SVG ', (t2) => {
 
     const h = new Hand({
       onStop: () => {
-        let c = map.getCenter();
+        const c = map.getCenter();
         map.removeLayer(path);
         map.off('click', failIfClickPropagates);
         t.deepEquals(center, [c.lat, c.lng], 'map center didnt change');
@@ -262,7 +262,7 @@ tape(' === Canvas === ', (t2) => {
 
     const h = new Hand({
       onStop: () => {
-        let c = map.getCenter();
+        const c = map.getCenter();
         map.removeLayer(path);
         map.off('click', failIfClickPropagates);
         t.deepEquals(center, [c.lat, c.lng], 'map center didnt change');
@@ -319,7 +319,7 @@ tape(' === Canvas === ', (t2) => {
 
     const h = new Hand({
       onStop: () => {
-        let c = map.getCenter();
+        const c = map.getCenter();
         map.removeLayer(path);
         map.off('click', failIfClickPropagates);
         t.deepEquals(center, [c.lat, c.lng], 'map center didnt change');
@@ -376,7 +376,7 @@ tape(' === Canvas === ', (t2) => {
 
     const h = new Hand({
       onStop: () => {
-        let c = map.getCenter();
+        const c = map.getCenter();
         map.removeLayer(path);
         map.off('click', failIfClickPropagates);
         t.deepEquals(center, [c.lat, c.lng], 'map center didnt change');
