@@ -20,10 +20,10 @@
   ],
   "scripts": {
     "test": "browserify --transform [ babelify --presets [ es2015 ] ] ./test/*.test.js | tape-run --render='tap-spec' | tap-status",
-    "start": "vite",
+    "start": "vite -c example/vite.config.ts",
     "lint": "eslint ./src/*.mjs",
-    "build-js": "vite build",
-    "build": "npm run lint && npm run build-js",
+    "docs": "vite build -c example/vite.config.ts",
+    "build": "npm run lint && vite build",
     "release": "git push origin master && git checkout gh-pages && git merge master && git push origin gh-pages && git checkout master && npm publish"
   },
   "keywords": [

@@ -9,8 +9,8 @@ const extensions = {
 export default defineConfig({
   build: {
     lib: {
-      formats: ['es', 'umd', 'cjs'],
       entry: 'src/index.mjs',
+      formats: ['es', 'umd', 'cjs'],
       name: require('./package.json').name,
       fileName: (format) => `index.${extensions[format]}`,
     },
