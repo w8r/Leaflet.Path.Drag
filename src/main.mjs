@@ -1,6 +1,6 @@
-import * as L from 'leaflet';
-// L.Browser.retina = true;
-import '../src';
+import * as L from 'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/+esm'; // L.Browser.retina = true;
+// use UMD build for the plugin
+import '../dist/index.js';
 
 ////////////////////////////////////////////////////////////////////////////////
 const map = (window.map = new L.Map('map', {

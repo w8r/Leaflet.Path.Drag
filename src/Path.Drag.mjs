@@ -118,6 +118,8 @@ Handler.PathDrag = Handler.extend(
         ? 'touchstart'
         : evt.originalEvent.type;
 
+      console.log({ eventType });
+
       this._mapDraggingWasEnabled = false;
       this._startPoint = evt.containerPoint.clone();
 
