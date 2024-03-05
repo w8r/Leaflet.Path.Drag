@@ -1,1 +1,0 @@
-console.error("\n/Users/amilevski/Downloads/Leaflet.Path.Drag/src/SVG.js:1\nimport { SVG } from 'leaflet';\n^\nParseError: 'import' and 'export' may appear only with 'sourceType: module'");

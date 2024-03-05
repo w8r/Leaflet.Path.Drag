@@ -31,11 +31,18 @@ jobs:
 
       # Build
       - name: Build lib
-        run: npm run build
+        run: |
+          npm run build
+          mkdir docs
+          mv dist/* docs/
+          mv index.html docs/
+          cp -r example docs/
+          mkdir docs/src
+          cp src/main.mjs docs/src/
 
       # Demo
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages # The branch the action should deploy to.
-          folder: '.' # The folder the action should deploy.
+          folder: 'docs' # The folder the action should deploy.
