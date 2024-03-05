@@ -34,11 +34,8 @@ jobs:
         run: |
           npm run build
           mkdir docs
-          mv dist/* docs/
-          mv index.html docs/
-          cp -r example docs/
-          mkdir docs/src
-          cp src/main.mjs docs/src/
+          cp -R dist example index.html docs/
+          mkdir docs/src && cp src/main.mjs docs/src/
 
       # Demo
       - name: Deploy 🚀
